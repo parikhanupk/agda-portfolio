@@ -1,9 +1,11 @@
 {-
 Proofs around the Divisibility Rule of 3 on base-10 list encoded naturals
-  lines 329 and 389
+  lines 361 and 421
 
 Unlike Divisibility.Rule2, this one ignores the length constraint for simplicity
 for example, an empty list is treated as a zero
+
+fromℕ-solver uses a dummy counter parameter to satisfy the termination checker
 -}
 
 
@@ -13,14 +15,14 @@ module Divisibility.Rule3 where
 
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _≥_; _∸_; _≤_; z≤n; s≤s; _<ᵇ_; _^_; _>_)
-open import Data.Nat.Properties using (+-comm; *-comm; +-assoc; +-∸-assoc; +-identityʳ)
+open import Data.Nat.Properties using (+-comm; *-comm; +-assoc; +-∸-assoc; +-identityʳ; *-distribˡ-+)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst; sym)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-open import Data.Bool using (Bool; true; false; _∧_)
+open import Data.Bool using (true)
 open import Data.List using (List; []; _∷_; length)
 open import Data.Bool.ListAction using (all)
 open import Utilities using (all→rest)
-open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃-syntax)
 
 
 
@@ -273,39 +275,69 @@ toℕᵇ∸sodᵇ-x∷xs b b≥1 x xs d<b =
 
 
 
-[[a+b]+c]∸1≡[a+b]+[c∸1] : ∀ (a b c : ℕ) → c ≥ 1 → ((a + b) + c) ∸ 1 ≡ (a + b) + (c ∸ 1)
-[[a+b]+c]∸1≡[a+b]+[c∸1] a b (suc c) (s≤s z≤n) rewrite +-assoc a b (suc c)
-                                                    | +-comm b (suc c)
-                                                    | +-comm a (suc (c + b))
-                                                    | +-comm c b
-                                                    | +-comm (b + c) a
-                                                    | +-assoc a b c
-                                                    = refl
+lemma-*-split : ∀ a b → a ≥ 1 → a * b ≡ b + (a ∸ 1) * b
+lemma-*-split (suc a) b _ = refl
+
+lemma-bᵃ∸1-suc : ∀ a b q → b ≥ 1 → b ^ a ∸ 1 ≡ q * (b ∸ 1) → b ^ (suc a) ∸ 1 ≡ (b ^ a + q) * (b ∸ 1)
+lemma-bᵃ∸1-suc a b q b≥1 bᵃ∸1≡q[b∸1] =
+  begin
+    b ^ suc a ∸ 1
+  ≡⟨ refl ⟩
+    b * (b ^ a) ∸ 1
+  ≡⟨ cong (_∸ 1) (lemma-*-split b (b ^ a) b≥1) ⟩
+    (b ^ a) + ((b ∸ 1) * (b ^ a)) ∸ 1
+  ≡⟨ cong (_∸ 1) (+-comm (b ^ a) ((b ∸ 1) * b ^ a)) ⟩
+    ((b ∸ 1) * (b ^ a)) + (b ^ a) ∸ 1
+  ≡⟨ +-∸-assoc ((b ∸ 1) * (b ^ a)) (b≥1→bᵃ≥1 b a b≥1) ⟩
+    ((b ∸ 1) * (b ^ a)) + ((b ^ a) ∸ 1)
+  ≡⟨ cong (((b ∸ 1) * (b ^ a)) +_) bᵃ∸1≡q[b∸1] ⟩
+    ((b ∸ 1) * (b ^ a)) + (q * (b ∸ 1))
+  ≡⟨ cong (((b ∸ 1) * (b ^ a)) +_) (*-comm q (b ∸ 1)) ⟩
+    ((b ∸ 1) * (b ^ a)) + ((b ∸ 1) * q)
+  ≡⟨ sym (*-distribˡ-+ (b ∸ 1) (b ^ a) q) ⟩
+    (b ∸ 1) * ((b ^ a) + q)
+  ≡⟨ *-comm (b ∸ 1) (b ^ a + q) ⟩
+    (b ^ a + q) * (b ∸ 1)
+  ∎
+
+b∸1-divides-bᵃ∸1 : ∀ (a b : ℕ) → b ≥ 1 → ∃[ q ] ((b ^ a) ∸ 1 ≡ q * (b ∸ 1))
+b∸1-divides-bᵃ∸1 zero b b≥1 = 0 , refl
+b∸1-divides-bᵃ∸1 (suc a) b b≥1 =
+                 let q , bᵃ∸1≡q[b∸1] = b∸1-divides-bᵃ∸1 a b b≥1
+                 in (b ^ a) + q , lemma-bᵃ∸1-suc a b q b≥1 bᵃ∸1≡q[b∸1]
+{-
+from IH there is some q such that b ^ a ∸ 1 ≡ q * (b ∸ 1)
+now, b ^ (suc a) ∸ 1
+   = b * (b ^ a) ∸ 1
+   = (b ^ a) + ((b ∸ 1) * (b ^ a)) ∸ 1
+   = ((b ∸ 1) * (b ^ a)) + (b ^ a) ∸ 1
+   = ((b ∸ 1) * (b ^ a)) + (b ^ a ∸ 1)
+   = ((b ∸ 1) * (b ^ a)) + (q * (b ∸ 1)) from IH
+   = ((b ∸ 1) * (b ^ a)) + ((b ∸ 1) * q)
+   = (b ∸ 1) * ((b ^ a) + q)
+   = ((b ^ a) + q) * (b ∸ 1)
+which means (b ∸ 1) divides (b ^ (suc a) ∸ 1), hence proved
+but to prove constructively we need a q' such that b ^ (suc a) ∸ 1 ≡ q' * (b ∸ 1)
+so, q' = (((b ^ a) + q) * (b ∸ 1)) / (b ∸ 1)
+       = (b ^ a) + q
+       = ((q * (b ∸ 1)) + 1) + q from IH
+       = qb ∸ q + 1 + q
+       = qb + 1
+so, we can use any of "(b ^ a) + q" or "qb + 1" as q'
+-}
 
 
 
-10ᵃ≥1 : ∀ (a : ℕ) → (10 ^ a) ≥ 1
-10ᵃ≥1 a = b≥1→bᵃ≥1 10 a (s≤s z≤n)
-
-
+div9-10ᵃ∸1 : ∀ (a : ℕ) → ∃[ q ] (10 ^ a ∸ 1 ≡ q * 9)
+div9-10ᵃ∸1 a = b∸1-divides-bᵃ∸1 a 10 (s≤s z≤n)
 
 div3-n*9 : ∀ (n : ℕ) → Div3 (n * 9)
 div3-n*9 zero = d3z
 div3-n*9 (suc n) = d3s (d3s (d3s (div3-n*9 n)))
 
-
-
-div3-9*n : ∀ (n : ℕ) → Div3 (9 * n)
-div3-9*n n rewrite *-comm 9 n = div3-n*9 n
-
-
-
 div3-10ᵃ∸1 : ∀ (a : ℕ) → Div3 ((10 ^ a) ∸ 1)
-div3-10ᵃ∸1 zero = d3z
-div3-10ᵃ∸1 (suc a)
-           rewrite +-comm (10 ^ a) (9 * 10 ^ a)
-                 | [[a+b]+c]∸1≡[a+b]+[c∸1] (10 ^ a) (8 * 10 ^ a) (10 ^ a) (10ᵃ≥1 a)
-                 = d3a→d3b→d3[a+b] (9 * 10 ^ a) (10 ^ a ∸ 1) (div3-9*n (10 ^ a)) (div3-10ᵃ∸1 a)
+div3-10ᵃ∸1 a with div9-10ᵃ∸1 a
+...             | q , 10ᵃ∸1≡q*9 = subst Div3 (sym 10ᵃ∸1≡q*9) (div3-n*9 q)
 
 
 
