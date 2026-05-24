@@ -1,0 +1,14 @@
+#! /usr/bin/bash
+
+
+
+echo -n "deleting _build ... " &&
+rm -rf _build &&
+echo "done"
+
+
+
+echo "deleting emacs backup files in src:" &&
+find src -name "*~" -type f -print -delete &&
+echo "done"
+

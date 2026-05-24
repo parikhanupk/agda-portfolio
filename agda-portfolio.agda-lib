@@ -1,0 +1,4 @@
+name: agda-portfolio
+include: src
+depend: standard-library
+

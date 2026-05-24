@@ -1,0 +1,10 @@
+# Agda interface files
+*.agdai
+
+# Emacs backup files
+*~
+# #*#
+
+# macOS system files
+.DS_Store
+
