@@ -1,0 +1,14 @@
+#! /usr/bin/bash
+
+commits=$(git log --reverse --format="%H")
+count=1
+
+for hash in $commits
+do
+	target_dir="_extract/v$count"
+	mkdir -pv $target_dir &&
+	git archive "$hash" | tar -xC $target_dir &&
+	echo "exported version $count having hash $hash into $target_dir" &&
+	count=$((count + 1))
+done
+
