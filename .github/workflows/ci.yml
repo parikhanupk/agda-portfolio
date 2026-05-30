@@ -1,0 +1,32 @@
+# Pipeline Configuration: GitHub Actions Workflow
+# Orchestrated By: parikhanupk with the help of:
+# 1. actions/checkout (GitHub Core Team) (env actions)
+# 2. agda/agda-setup-action (Agda Maintenance & Research Team) (env actions)
+# 3. Google (this is my first ever GitHub CI file)
+
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  typecheck:
+    name: Agda Verification Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    - name: Setup Agda and Standard Library
+      uses: agda/agda-setup-action@v1
+      with:
+        agda-version: '2.8.0'
+        agda-stdlib-version: 'v2.3'
+
+    - name: Run Library Manifest Verification
+      run: agda --build-library
+
