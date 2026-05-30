@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "==> [AGDA] Type-checking library manifest ..."
+
+agda --build-library
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Agda type-checking failed! Do not commit."
+    exit 1
+fi
+
+echo "SUCCESS: Agda type-checking succeeded! Ready to commit."
+exit 0
+
