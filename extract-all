@@ -1,5 +1,7 @@
 #! /usr/bin/bash
 
+# the following merely creates versioned node snapshots (not the DAG managed by git)
+
 commits=$(git log --reverse --format="%H")
 count=1
 
