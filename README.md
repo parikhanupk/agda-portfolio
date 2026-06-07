@@ -21,10 +21,11 @@ Proofs around the divisibility rule of 2 on base-10 list encoded naturals.
 ### 2. `Divisibility/Rule3.agda`
 Proofs around the divisibility rule of 3 on base-10 list encoded naturals.
 
-### 3. `Divisibility/RuleB.agda`
+### 3. `Divisibility/RuleB.agda` and `Divisibility/RuleBi.agda`
 Proofs around a generalized sum of digits based Divisibility Rule on list encoded naturals in any base
+Both files are mostly same with one exception (please use `diff` to see the difference)
 
-### 4. `Puzzles/nnn+11n-is-div-by-6.agda` and `Polynomials\Binomials.agda`
+### 4. `Puzzles/nnn+11n-is-div-by-6.agda` and `Polynomials/Binomials.agda`
 Proof that `n³ + 11n` is divisible by 6
 
 ## Background
