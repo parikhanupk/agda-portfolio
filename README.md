@@ -13,6 +13,7 @@
 [^1]: especially for some scripts such as clean, extract-all, and test-before-commit.
 
 ## A growing list of proofs and projects
+*Note: As this repository grows with additional proofs and projects, existing reusable components and directory structures may be reorganized to improve scalability and maintainability.*
 
 ### 1. `Divisibility/Rule2.agda`
 Proofs around the divisibility rule of 2 on base-10 list encoded naturals.
