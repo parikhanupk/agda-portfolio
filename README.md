@@ -28,6 +28,9 @@ Both files are mostly same with one exception (please use `diff` to see the diff
 ### 4. `Puzzles/nnn+11n-is-div-by-6.agda` and `Polynomials/Binomials.agda`
 Proof that `n³ + 11n` is divisible by 6
 
+### 5. `Series/Properties/Nicomachus.agda`
+Proof of Nicomachus' theorem: `sum of cubes = square of sum`
+
 ## Background
 
 Despite a long professional hiatus due to an interest in writing fiction, I periodically renew my foundational CS knowledge, including practice on Leetcode, to stay in touch with the field, as I have long standing interests in computing, especially in the domains of privacy and systems software. Around 2022-2023 I took courses such as `Andrew Ng's GNU Octave based ML course` and `Dan Grossman's three-part PL course`, which led me to a research professor's website and an informational video mentioning an asynchronous mentorship program in the PL community. I applied, out of curiosity and interest, and the program's committee matched me to a mentor whose focus on Agda and insightful guidance introduced me to the language.
