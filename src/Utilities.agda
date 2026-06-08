@@ -7,6 +7,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
+open import Data.Nat using (ℕ; _*_; _^_)
+open import Data.Nat.Properties using (*-identityʳ)
 
 
 
@@ -37,3 +39,11 @@ rest→all P a as Pa all-P-as = cong₂ _∧_ Pa all-P-as
     true
   ∎
 -}
+
+
+
+_² = _^ 2
+_³ = _^ 3
+
+a²≡a*a : ∀ (a : ℕ) → a ² ≡ a * a
+a²≡a*a a rewrite *-identityʳ a = refl

@@ -3,17 +3,11 @@ module Polynomials.Binomials where
 
 
 open import Data.Nat using (ℕ; zero; suc; _*_; _+_)
-open import Data.Nat.Properties using (+-identityʳ; +-assoc; +-comm; *-comm; *-distribʳ-+; *-distribˡ-+; *-assoc; *-identityˡ)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+open import Data.Nat.Properties using (+-identityʳ; +-assoc; +-comm)
+open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-assoc; *-identityˡ; *-identityʳ)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; cong₂)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-
-
-
-_² : ℕ → ℕ
-n ² = n * n
-
-_³ : ℕ → ℕ
-n ³ = n * n ²
+open import Utilities using (_²; _³; a²≡a*a)
 
 
 
@@ -22,20 +16,24 @@ n ³ = n * n ²
   begin
     (a + b) ²
   ≡⟨⟩
+    (a + b) * ((a + b) * 1)
+  ≡⟨ cong (λ x → (a + b) * x) (*-identityʳ (a + b)) ⟩
     (a + b) * (a + b)
   ≡⟨ *-distribʳ-+ (a + b) a b ⟩
     (a * (a + b)) + (b * (a + b))
   ≡⟨ cong (_+ (b * (a + b))) (*-distribˡ-+ a a b) ⟩
-    ((a ²) + (a * b)) + (b * (a + b))
-  ≡⟨ cong (((a ²) + (a * b)) +_) (*-distribˡ-+ b a b) ⟩
-    ((a ²) + (a * b)) + ((b * a) + (b ²))
-  ≡⟨ cong (((a ²) + (a * b)) +_) (cong (_+ (b ²)) (*-comm b a)) ⟩
-    ((a ²) + (a * b)) + ((a * b) + (b ²))
-  ≡⟨ sym (+-assoc ((a ²) + (a * b)) (a * b) (b ²)) ⟩
-    ((a ²) + (a * b) + (a * b)) + (b ²)
-  ≡⟨ cong (_+ b ²) (+-assoc (a ²) (a * b) (a * b)) ⟩
-    (a ²) + ((a * b) + (a * b)) + (b ²)
-  ≡⟨ cong (_+ (b ²)) (cong ((a ²) +_) (cong ((a * b) +_) (sym (+-identityʳ (a * b))))) ⟩
+    ((a * a) + (a * b)) + (b * (a + b))
+  ≡⟨ cong (((a * a) + (a * b)) +_) (*-distribˡ-+ b a b) ⟩
+    ((a * a) + (a * b)) + ((b * a) + (b * b))
+  ≡⟨ cong (((a * a) + (a * b)) +_) (cong (_+ (b * b)) (*-comm b a)) ⟩
+    ((a * a) + (a * b)) + ((a * b) + (b * b))
+  ≡⟨ sym (+-assoc ((a * a) + (a * b)) (a * b) (b * b)) ⟩
+    ((a * a) + (a * b) + (a * b)) + (b * b)
+  ≡⟨ cong (_+ (b * b)) (+-assoc (a * a) (a * b) (a * b)) ⟩
+    (a * a) + ((a * b) + (a * b)) + (b * b)
+  ≡⟨ cong (_+ (b * b)) (cong ((a * a) +_) (cong ((a * b) +_) (sym (+-identityʳ (a * b))))) ⟩
+    (a * a) + (2 * (a * b)) + (b * b)
+  ≡⟨ cong₂ (λ x y → x + (2 * (a * b)) + y) (sym (a²≡a*a a)) (sym (a²≡a*a b)) ⟩
     (a ²) + (2 * (a * b)) + (b ²)
   ∎
 
@@ -43,6 +41,7 @@ n ³ = n * n ²
 
 [1+n]²≡1+2n+n² : ∀ (n : ℕ) → (1 + n) ² ≡ 1 + (2 * n) + (n ²)
 [1+n]²≡1+2n+n² n rewrite +-identityʳ n
+                       | *-identityʳ n
                        | *-comm n (suc n)
                        | sym (+-assoc n n (n * n))
                        = refl
@@ -65,7 +64,9 @@ a[a+b]²≡a³+2a²b+ab² a b =
     (a ³) + ((2 * a) * (a * b)) + (a * b ²)
   ≡⟨ cong (_+ (a * b ²)) (cong (a ³ +_) (*-assoc 2 a (a * b))) ⟩
     (a ³) + (2 * (a * (a * b))) + (a * b ²)
-  ≡⟨ cong (_+ (a * b ²)) (cong (a ³ +_) (cong (2 *_) (sym (*-assoc a a b)))) ⟩
+  ≡⟨ cong (λ x → (a ³) + (2 * x) + (a * b ²)) (sym (*-assoc a a b)) ⟩
+    (a ³) + (2 * ((a * a) * b)) + (a * b ²)
+  ≡⟨ cong (λ x → (a ³) + (2 * (x * b)) + (a * b ²)) (sym (a²≡a*a a)) ⟩
     (a ³) + (2 * ((a ²) * b)) + (a * (b ²))
   ∎
 

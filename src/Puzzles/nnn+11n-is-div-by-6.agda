@@ -3,11 +3,12 @@ module Puzzles.nnn+11n-is-div-by-6 where
 
 
 open import Data.Nat using (ℕ; zero; suc; s≤s; z≤n; _+_; _*_)
-open import Data.Nat.Properties using (+-comm; +-identityʳ; +-assoc; *-distribˡ-+)
+open import Data.Nat.Properties using (+-comm; +-identityʳ; +-assoc; *-distribˡ-+; *-identityʳ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Divisibility.RuleB using (Div; dz; ds; da→db→d[a+b])
-open import Polynomials.Binomials using (_²; [1+n]²≡1+2n+n²; _³; [1+n]³=1+3n+3n²+n³)
+open import Utilities using (_²; _³; a²≡a*a)
+open import Polynomials.Binomials using ([1+n]²≡1+2n+n²; [1+n]³=1+3n+3n²+n³)
 
 
 
@@ -27,10 +28,11 @@ d2-[n+n²] : ∀ (n : ℕ) → Div2 (n + n ²)
 d2-[n+n²] zero = dz
 d2-[n+n²] (suc n) rewrite [1+n]²≡1+2n+n² n
                         | +-identityʳ n
+                        | *-identityʳ n
                         | +-comm n (suc (n + n + n * n))
                         | +-assoc (n + n) (n * n) n
                         | +-comm (n * n) n
-                        = ds (da→db→d[a+b] (s≤s z≤n) (d2-n+n n) (d2-[n+n²] n))
+                        = ds (da→db→d[a+b] (s≤s z≤n) (d2-n+n n) (subst Div2 (cong (n +_) (a²≡a*a n)) (d2-[n+n²] n)))
 
 
 
