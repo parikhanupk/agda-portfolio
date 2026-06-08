@@ -12,6 +12,11 @@ open import Data.Nat.Properties using (*-identityʳ)
 
 
 
+a≡b→Pb→Pa : ∀ {A : Set} → {a b : A} → (P : A → Set) → a ≡ b → P b → P a
+a≡b→Pb→Pa P refl Pb = Pb
+
+
+
 ∧-left : ∀ {a b : Bool} → a ∧ b ≡ true → a ≡ true
 ∧-left {true} {b} refl = refl
 

@@ -15,21 +15,24 @@
 ## A growing list of proofs and projects
 *Note: As this repository grows with additional proofs and projects, existing reusable components and directory structures may be reorganized to improve scalability and maintainability.*
 
-### 1. `Divisibility/Rule2.agda`
+#### 1. [src/Divisibility/Rule2.agda](src/Divisibility/Rule2.agda)
 Proofs around the divisibility rule of 2 on base-10 list encoded naturals.
 
-### 2. `Divisibility/Rule3.agda`
+#### 2. [src/Divisibility/Rule3.agda](src/Divisibility/Rule3.agda)
 Proofs around the divisibility rule of 3 on base-10 list encoded naturals.
 
-### 3. `Divisibility/RuleB.agda` and `Divisibility/RuleBi.agda`
+#### 3. [src/Divisibility/RuleB.agda](src/Divisibility/RuleB.agda) and [src/Divisibility/RuleBi.agda](src/Divisibility/RuleBi.agda)
 Proofs around a generalized sum of digits based Divisibility Rule on list encoded naturals in any base
-Both files are mostly same with one exception (please use `diff` to see the difference)
+RuleBi.agda is purely inductive
 
-### 4. `Puzzles/nnn+11n-is-div-by-6.agda` and `Polynomials/Binomials.agda`
-Proof that `n³ + 11n` is divisible by 6
+#### 4. [src/Puzzles/nnn+11n-is-div-by-6.agda](src/Puzzles/nnn+11n-is-div-by-6.agda) and [src/Polynomials/Binomials.agda](src/Polynomials/Binomials.agda)
+Proof that `n³ + 11n is divisible by 6`
 
-### 5. `Series/Properties/Nicomachus.agda`
+#### 5. [src/Series/Properties/Nicomachus.agda](src/Series/Properties/Nicomachus.agda)
 Proof of Nicomachus' theorem: `sum of cubes = square of sum`
+
+#### 6. [src/Puzzles/MO-Russia-1964-div-by-7.agda](src/Puzzles/MO-Russia-1964-div-by-7.agda)
+Some proofs around an IMO problem, primarily `2ⁿ ∸ 1 is divisible by 7 if and only if n is divisible by 3`
 
 ## Background
 

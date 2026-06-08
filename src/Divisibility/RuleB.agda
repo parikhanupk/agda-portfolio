@@ -44,6 +44,9 @@ db→d[a*b] : ∀ {d a b : ℕ} → (p : d > 0) → Div d p b → Div d p (a * b
 db→d[a*b] {d} {zero} {b} p db = dz
 db→d[a*b] {d} {suc a} {b} p db = da→db→d[a+b] p db (db→d[a*b] {d} {a} {b} p db)
 
+da→d[a*b] : ∀ {d a b : ℕ} → (p : d > 0) → Div d p a → Div d p (a * b)
+da→d[a*b] {d} {a} {b} p da = subst (Div d p) (*-comm b a) (db→d[a*b] {d} {b} {a} p da)
+
 
 
 a→da : ∀ {a : ℕ} → (p : a > 0) → Div a p a
