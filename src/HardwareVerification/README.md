@@ -1,0 +1,1 @@
+Hardware verification typically involves treating circuits as programs and specifications as types - which involves comparing a design (how it is built) against a specification (what it should do) where verification typically involves writing a proof that a gate or a circuit matches its truth table.

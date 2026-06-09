@@ -34,6 +34,9 @@ Proof of Nicomachus' theorem: `sum of cubes = square of sum`
 #### 6. [src/Puzzles/MO-Russia-1964-div-by-7.agda](src/Puzzles/MO-Russia-1964-div-by-7.agda)
 Some proofs around an IMO problem, primarily `2ⁿ ∸ 1 is divisible by 7 if and only if n is divisible by 3`
 
+#### 7. [src/HardwareVerification](src/HardwareVerification)
+Work in progress, still learning
+
 ## Background
 
 Despite a long professional hiatus due to an interest in writing fiction, I periodically renew my foundational CS knowledge, including practice on Leetcode, to stay in touch with the field, as I have long standing interests in computing, especially in the domains of privacy and systems software. Around 2022-2023 I took courses such as `Andrew Ng's GNU Octave based ML course` and `Dan Grossman's three-part PL course`, which led me to a research professor's website and an informational video mentioning an asynchronous mentorship program in the PL community. I applied, out of curiosity and interest, and the program's committee matched me to a mentor whose focus on Agda and insightful guidance introduced me to the language.
