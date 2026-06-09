@@ -4,11 +4,10 @@ module Puzzles.MO-Russia-1964-div-by-7 where
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_; _*_; _≤_; z≤n; s≤s; _>_; _^_)
 open import Data.Nat.Properties using (*-distribˡ-+; *-comm; +-comm; +-assoc; *-assoc; +-∸-assoc)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.Empty using (⊥; ⊥-elim)
-open import Divisibility.RuleB using (Div; dz; ds; da→db→d[a+b]; db→d[a*b]; da→d[a+b]→db; da→d[a*b])
-open import Utilities using (a≡b→Pb→Pa)
+open import Divisibility.RuleB using (Div; dz; ds; da→db→d[a+b]; db→d[a*b]; da→d[a+b]→db; da→d[a*b]; b≥1→bᵃ≥1)
 
 
 
@@ -48,36 +47,13 @@ ab-1≡a[b-1]+[a-1] (suc a) (suc b) _ _ rewrite *-distribˡ-+ a 1 b
 
 
 
-a>0→b>0→ab>0 : ∀ a b → (a > 0) → (b > 0) → a * b > 0
-a>0→b>0→ab>0 (suc a) (suc b) _ _ = s≤s z≤n
-
-
-
-8ᵖ>0 : ∀ p → 8 ^ p > 0
-8ᵖ>0 zero = s≤s z≤n
-8ᵖ>0 (suc p) = a>0→b>0→ab>0 8 (8 ^ p) (s≤s z≤n) (8ᵖ>0 p)
-
-
-
 proof-a : (p : ℕ) → Div7 ((8 ^ p) ∸ 1)
 proof-a zero = dz
-proof-a (suc p) = a≡b→Pb→Pa Div7
-                            (ab-1≡a[b-1]+[a-1] 8 (8 ^ p) (s≤s z≤n) (8ᵖ>0 p))
-                            (da→db→d[a+b] {7} {8 * ((8 ^ p) ∸ 1)} {(8 ∸ 1)} (s≤s z≤n)
-                                          (db→d[a*b] {7} {8} {(8 ^ p) ∸ 1} (s≤s z≤n) (proof-a p))
-                                          (ds dz))
-
-
-
-a≤b→a≤[b+c] : ∀ a b c → a ≤ b → a ≤ (b + c)
-a≤b→a≤[b+c] a b c z≤n = z≤n
-a≤b→a≤[b+c] a b c (s≤s x) = s≤s (a≤b→a≤[b+c] _ _ c x)
-
-
-
-1≤2ⁿ : ∀ n → 1 ≤ 2 ^ n
-1≤2ⁿ zero = s≤s z≤n
-1≤2ⁿ (suc n) rewrite +-comm (2 ^ n) zero = a≤b→a≤[b+c] 1 (2 ^ n) (2 ^ n) (1≤2ⁿ n)
+proof-a (suc p) = subst Div7
+                        (sym (ab-1≡a[b-1]+[a-1] 8 (8 ^ p) (s≤s z≤n) (b≥1→bᵃ≥1 8 p (s≤s z≤n))))
+                        (da→db→d[a+b] {7} {8 * ((8 ^ p) ∸ 1)} {(8 ∸ 1)} (s≤s z≤n)
+                                      (db→d[a*b] {7} {8} {(8 ^ p) ∸ 1} (s≤s z≤n) (proof-a p))
+                                      (ds dz))
 
 
 
@@ -95,14 +71,14 @@ a≤b→a≤[b+c] a b c (s≤s x) = s≤s (a≤b→a≤[b+c] _ _ c x)
     ((2 ^ n) + 7 * (2 ^ n)) ∸ 1
   ≡⟨ cong (_∸ 1) (+-comm (2 ^ n) (7 * 2 ^ n)) ⟩
     ((7 * (2 ^ n)) + (2 ^ n)) ∸ 1
-  ≡⟨ +-∸-assoc (7 * (2 ^ n)) (1≤2ⁿ n) ⟩
+  ≡⟨ +-∸-assoc (7 * (2 ^ n)) (b≥1→bᵃ≥1 2 n (s≤s z≤n)) ⟩
     (7 * (2 ^ n)) + ((2 ^ n) ∸ 1)
   ∎
 
 
 
 d7[2ˢˢˢⁿ-1]→d7[[7*2ⁿ]+[2ⁿ-1]] : ∀ n → Div7 ((2 ^ suc (suc (suc n))) ∸ 1) → Div7 ((7 * (2 ^ n)) + ((2 ^ n) ∸ 1))
-d7[2ˢˢˢⁿ-1]→d7[[7*2ⁿ]+[2ⁿ-1]] n div7-2ˢˢˢⁿ-1 = a≡b→Pb→Pa Div7 (sym (2ˢˢˢⁿ-1≡[7*2ⁿ]+[2ⁿ-1] n)) div7-2ˢˢˢⁿ-1
+d7[2ˢˢˢⁿ-1]→d7[[7*2ⁿ]+[2ⁿ-1]] n div7-2ˢˢˢⁿ-1 = subst Div7 (2ˢˢˢⁿ-1≡[7*2ⁿ]+[2ⁿ-1] n) div7-2ˢˢˢⁿ-1
 
 
 
@@ -120,11 +96,11 @@ proof-aˡ (suc (suc (suc n))) div7-2ˢˢˢⁿ-1 = ds (proof-aˡ n (div7-2ˢˢˢ�
 
 
 div7-2ⁿ-1→div7-2ˢˢˢⁿ-1 : ∀ n → Div7 ((2 ^ n) ∸ 1) → Div7 ((2 ^ suc (suc (suc n))) ∸ 1)
-div7-2ⁿ-1→div7-2ˢˢˢⁿ-1 n div7-2ⁿ-1 = a≡b→Pb→Pa Div7
-                                               (2ˢˢˢⁿ-1≡[7*2ⁿ]+[2ⁿ-1] n)
-                                               (da→db→d[a+b] {7} {7 * (2 ^ n)} {2 ^ n ∸ 1} (s≤s z≤n)
-                                                             (da→d[a*b] {7} {7} {2 ^ n} (s≤s z≤n) (ds dz))
-                                                             div7-2ⁿ-1)
+div7-2ⁿ-1→div7-2ˢˢˢⁿ-1 n div7-2ⁿ-1 = subst Div7
+                                           (sym (2ˢˢˢⁿ-1≡[7*2ⁿ]+[2ⁿ-1] n))
+                                           (da→db→d[a+b] {7} {7 * (2 ^ n)} {2 ^ n ∸ 1} (s≤s z≤n)
+                                                         (da→d[a*b] {7} {7} {2 ^ n} (s≤s z≤n) (ds dz))
+                                                         div7-2ⁿ-1)
 
 
 
@@ -164,7 +140,7 @@ d7[[7*2ⁿ]+[2ⁿ+1]]→d7[2ⁿ+1] n div7-[[7*2ⁿ]+[2ⁿ+1]] =
 
 proof-b : (n : ℕ) → Div7 ((2 ^ n) + 1) → ⊥
 proof-b (suc (suc (suc n))) div7-2ˢˢˢⁿ+1 =
-        ⊥-elim (proof-b n (d7[[7*2ⁿ]+[2ⁿ+1]]→d7[2ⁿ+1] n (a≡b→Pb→Pa Div7 (sym (2ˢˢˢⁿ+1≡[7*2ⁿ]+[2ⁿ+1] n)) div7-2ˢˢˢⁿ+1)))
+        ⊥-elim (proof-b n (d7[[7*2ⁿ]+[2ⁿ+1]]→d7[2ⁿ+1] n (subst Div7 (2ˢˢˢⁿ+1≡[7*2ⁿ]+[2ⁿ+1] n) div7-2ˢˢˢⁿ+1)))
 
 
 
