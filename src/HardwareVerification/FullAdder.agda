@@ -2,9 +2,9 @@ module HardwareVerification.FullAdder where
 
 
 
-open import HardwareVerification.Bit using (Bit; low; high)
-open import HardwareVerification.XorGate using (_⊕_; xor-comm; xor-assoc; xor-fixed-high)
-open import HardwareVerification.AndGate using (_∧_; and-comm)
+open import HardwareVerification.Bit using (Bit; low; high; valB)
+open import HardwareVerification.XorGate using (_⊕_; xor-comm; xor-assoc; xor-fixed-high; xor-identityʳ)
+open import HardwareVerification.AndGate using (_∧_; and-comm; and-identityʳ)
 open import HardwareVerification.OrGate using (_∨_; or-identityʳ; distrib-∨∧; or-contradiction; or-comm)
 open import Data.Product using (_×_) renaming (_,_ to ⟨_,_⟩)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
@@ -50,23 +50,74 @@ _ = refl
 
 
 
-toℕ : Bit → ℕ
-toℕ low = zero
-toℕ high = suc zero
+valFA : ∀ (A B Cᵢₙ : Bit) → ℕ
+valFA A B Cᵢₙ = let ⟨ Cₒᵤₜ , Sum ⟩ = FA A B Cᵢₙ
+                in (2 * (valB Cₒᵤₜ)) + valB Sum
 
 
 
-FA-mathematical-conformance : (A B Cᵢₙ : Bit)
-                            → let ⟨ Cₒᵤₜ , Sum ⟩ = (FA A B Cᵢₙ)
-                              in toℕ A + toℕ B + toℕ Cᵢₙ ≡ (2 * toℕ Cₒᵤₜ) + toℕ Sum
-FA-mathematical-conformance low low low = refl
-FA-mathematical-conformance low low high = refl
-FA-mathematical-conformance low high low = refl
-FA-mathematical-conformance low high high = refl
-FA-mathematical-conformance high low low = refl
-FA-mathematical-conformance high low high = refl
-FA-mathematical-conformance high high low = refl
-FA-mathematical-conformance high high high = refl
+valFA₁≡suc[valFA₀] : ∀ (A B : Bit) → valFA A B high ≡ suc (valFA A B low)
+valFA₁≡suc[valFA₀] low low = refl
+valFA₁≡suc[valFA₀] low high = refl
+valFA₁≡suc[valFA₀] high low = refl
+valFA₁≡suc[valFA₀] high high = refl
+
+
+
+[a∧b]∨[a⊕b]≡a∨b : ∀ (a b : Bit) → (a ∧ b) ∨ (a ⊕ b) ≡ a ∨ b
+[a∧b]∨[a⊕b]≡a∨b low b = refl
+[a∧b]∨[a⊕b]≡a∨b high b =
+  begin
+    (high ∧ b) ∨ (high ⊕ b)
+  ≡⟨ refl ⟩
+    b ∨ (high ⊕ b)
+  ≡⟨ cong (b ∨_) (xor-comm high b) ⟩
+    b ∨ (b ⊕ high)
+  ≡⟨ cong (b ∨_) (xor-fixed-high b) ⟩
+    b ∨ (¬ b)
+  ≡⟨ or-contradiction b ⟩
+    high
+  ∎
+
+
+
+lemma-FA₀ : ∀ (A B : Bit) → FA A B low ≡ ⟨ A ∧ B , A ⊕ B ⟩
+lemma-FA₀ A B =
+  begin
+    FA A B low
+  ≡⟨ refl ⟩
+    ⟨ ((A ∧ B) ∨ ((A ⊕ B) ∧ low)) , (A ⊕ B) ⊕ low ⟩
+  ≡⟨ cong₂ (λ x y → ⟨ ((A ∧ B) ∨ x) , y ⟩) (and-comm (A ⊕ B) low) (xor-identityʳ (A ⊕ B)) ⟩
+    ⟨ ((A ∧ B) ∨ low) , (A ⊕ B) ⟩
+  ≡⟨ cong (λ x → ⟨ x , (A ⊕ B) ⟩) (or-comm (A ∧ B) low) ⟩
+    ⟨ A ∧ B , A ⊕ B ⟩
+  ∎
+
+
+
+lemma-FA₁ : ∀ (A B : Bit) → FA A B high ≡ ⟨ A ∨ B , ¬ (A ⊕ B) ⟩
+lemma-FA₁ A B =
+  begin
+    FA A B high
+  ≡⟨ refl ⟩
+    ⟨ ((A ∧ B) ∨ ((A ⊕ B) ∧ high)) , (A ⊕ B) ⊕ high ⟩
+  ≡⟨ cong₂ (λ x y → ⟨ ((A ∧ B) ∨ x) , y ⟩) (and-identityʳ (A ⊕ B)) (xor-fixed-high (A ⊕ B)) ⟩
+    ⟨ ((A ∧ B) ∨ (A ⊕ B)) , ¬ (A ⊕ B) ⟩
+  ≡⟨ cong (λ x → ⟨ x , ¬ (A ⊕ B) ⟩) ([a∧b]∨[a⊕b]≡a∨b A B) ⟩
+    ⟨ A ∨ B , ¬ (A ⊕ B) ⟩
+  ∎
+
+
+
+FA-valid : (A B Cᵢₙ : Bit) → valFA A B Cᵢₙ ≡ valB A + valB B + valB Cᵢₙ
+FA-valid low low low = refl
+FA-valid low low high = refl
+FA-valid low high low = refl
+FA-valid low high high = refl
+FA-valid high low low = refl
+FA-valid high low high = refl
+FA-valid high high low = refl
+FA-valid high high high = refl
 
 
 
