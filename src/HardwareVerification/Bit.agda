@@ -7,11 +7,11 @@ open import Data.Nat using (ℕ)
 
 
 data Bit : Set where
-  low  : Bit
-  high : Bit
+  O : Bit
+  I : Bit
 
 
 
 valB : Bit → ℕ
-valB low = 0
-valB high = 1
+valB O = 0
+valB I = 1

@@ -2,7 +2,7 @@ module HardwareVerification.NotGate where
 
 
 
-open import HardwareVerification.Bit using (Bit; low; high)
+open import HardwareVerification.Bit using (Bit; O; I)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_)
 open import Data.Empty using (⊥)
 open import Data.Product using (∃-syntax) renaming (_,_ to ⟨_,_⟩)
@@ -10,53 +10,53 @@ open import Data.Product using (∃-syntax) renaming (_,_ to ⟨_,_⟩)
 
 
 ¬ : Bit → Bit
-¬ low  = high
-¬ high = low
+¬ O = I
+¬ I = O
 
 
 
 --truth table conformance
-not-low : ¬ low ≡ high
-not-low = refl
+¬O : ¬ O ≡ I
+¬O = refl
 
-not-high : ¬ high ≡ low
-not-high = refl
+¬I : ¬ I ≡ O
+¬I = refl
 
 
 
 --part of verification would be to prove involution (the double-not law), or two not gates cancel out
-not-involution : ∀ (b : Bit) → ¬ (¬ b) ≡ b
-not-involution low  = refl
-not-involution high = refl
+¬¬b≡b : ∀ (b : Bit) → ¬ (¬ b) ≡ b
+¬¬b≡b O = refl
+¬¬b≡b I = refl
 
 
 
 --proof that input and output are never same
-not-distinction : ∀ (b : Bit) → ¬ b ≢ b
-not-distinction low ()
-not-distinction high ()
+¬b≢b : ∀ (b : Bit) → ¬ b ≢ b
+¬b≢b O ()
+¬b≢b I ()
 
 
 
---if outputs of two not-gates are same it implies that inputs must have been the same
-not-injective : ∀ (a b : Bit) → ¬ a ≡ ¬ b → a ≡ b
-not-injective low low high≡high = refl
-not-injective high high low≡low = refl
+--injectivity (if outputs of two not-gates are same it implies that inputs must have been the same)
+¬a≡¬b→a≡b : ∀ (a b : Bit) → ¬ a ≡ ¬ b → a ≡ b
+¬a≡¬b→a≡b O O refl = refl
+¬a≡¬b→a≡b I I refl = refl
 
 
 
 --surjectivity (existence) proof that every possible state can be reached by the gate
-not-surjective : ∀ (b : Bit) → ∃[ c ] (¬ c ≡ b)
-not-surjective low = ⟨ high , refl ⟩
-not-surjective high = ⟨ low , refl ⟩
+¬-surjective : ∀ (b : Bit) → ∃[ c ] (¬ c ≡ b)
+¬-surjective O = ⟨ I , refl ⟩
+¬-surjective I = ⟨ O , refl ⟩
 
 
 
 --absence of fixed point, proof that there is no stable bit that stays the same when inverted
-not-distinction‵ : ∀ (b : Bit) → (¬ b ≡ b) → ⊥
-not-distinction‵ low ()
-not-distinction‵ high ()
+¬-distinction‵ : ∀ (b : Bit) → (¬ b ≡ b) → ⊥
+¬-distinction‵ O ()
+¬-distinction‵ I ()
 
-not-distinction‵‵ : ∃[ b ] (¬ b ≡ b) → ⊥
-not-distinction‵‵ ⟨ low , () ⟩
-not-distinction‵‵ ⟨ high , () ⟩
+¬-distinction‵‵ : ∃[ b ] (¬ b ≡ b) → ⊥
+¬-distinction‵‵ ⟨ O , () ⟩
+¬-distinction‵‵ ⟨ I , () ⟩

@@ -2,115 +2,117 @@ module HardwareVerification.AndGate where
 
 
 
-open import HardwareVerification.Bit using (Bit; low; high)
+open import HardwareVerification.Bit using (Bit; O; I)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; cong)
-open import HardwareVerification.NotGate using (¬; not-involution)
-open import Data.Empty using (⊥-elim)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
+open import HardwareVerification.NotGate using (¬; ¬¬b≡b)
+open import Data.Empty using (⊥-elim)
 open import Data.Product using (_×_) renaming (_,_ to ⟨_,_⟩)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 
 
 _∧_ : Bit → Bit → Bit
-low ∧ b = low
-high ∧ b = b
+O ∧ b = O
+I ∧ b = b
 
 infixr 6 _∧_
 
 
 
 --truth table conformance
-_ : low ∧ low ≡ low
+_ : O ∧ O ≡ O
 _ = refl
 
-_ : low ∧ high ≡ low
+_ : O ∧ I ≡ O
 _ = refl
 
-_ : high ∧ low ≡ low
+_ : I ∧ O ≡ O
 _ = refl
 
-_ : high ∧ high ≡ high
+_ : I ∧ I ≡ I
 _ = refl
 
 
 
-and-comm : ∀ (a b : Bit) → a ∧ b ≡ b ∧ a
-and-comm low low = refl
-and-comm low high = refl
-and-comm high low = refl
-and-comm high high = refl
+∧-comm : ∀ (a b : Bit) → a ∧ b ≡ b ∧ a
+∧-comm O O = refl
+∧-comm O I = refl
+∧-comm I O = refl
+∧-comm I I = refl
 
 
 
-and-assoc : ∀ (a b c : Bit) → a ∧ (b ∧ c) ≡ (a ∧ b) ∧ c
-and-assoc low b c = refl
-and-assoc high b c = refl
+∧-assoc : ∀ (a b c : Bit) → a ∧ (b ∧ c) ≡ (a ∧ b) ∧ c
+∧-assoc O b c = refl
+∧-assoc I b c = refl
 
 
 
-and-idempotent : ∀ (b : Bit) → b ∧ b ≡ b
-and-idempotent low = refl
-and-idempotent high = refl
+--idempotence
+b∧b≡b : ∀ (b : Bit) → b ∧ b ≡ b
+b∧b≡b O = refl
+b∧b≡b I = refl
 
 
 
---high ∧ b ≡ b is definitional
-and-identityˡ : ∀ (b : Bit) → high ∧ b ≡ b
-and-identityˡ b = refl
+--I ∧ b ≡ b is definitional
+∧-identityˡ : ∀ (b : Bit) → I ∧ b ≡ b
+∧-identityˡ b = refl
 
-and-identityʳ : ∀ (b : Bit) → b ∧ high ≡ b
-and-identityʳ b rewrite and-comm b high = refl
-
-
-
---low ∧ b ≡ low is definitional
-and-annihilationˡ : ∀ (b : Bit) → low ∧ b ≡ low
-and-annihilationˡ b = refl
-
-and-annihilationʳ : ∀ (b : Bit) → b ∧ low ≡ low
-and-annihilationʳ b rewrite and-comm b low = refl
+∧-identityʳ : ∀ (b : Bit) → b ∧ I ≡ b
+∧-identityʳ b rewrite ∧-comm b I = refl
 
 
 
-and-contradiction : ∀ (b : Bit) → b ∧ ¬ b ≡ low
-and-contradiction low = refl
-and-contradiction high = refl
+--annihilation, O annihilates the other input
+b∧O≡O : ∀ (b : Bit) → b ∧ O ≡ O
+b∧O≡O b rewrite ∧-comm b O = refl
 
 
 
-and-inverted-identity : ∀ (b : Bit) → ¬ (b ∧ high) ≡ ¬ b
-and-inverted-identity low = refl
-and-inverted-identity high = refl
+--contradiction
+b∧¬b≡O : ∀ (b : Bit) → b ∧ ¬ b ≡ O
+b∧¬b≡O O = refl
+b∧¬b≡O I = refl
 
 
 
-and-inverted-annihilation : ∀ (b : Bit) → ¬ (b ∧ low) ≡ high
-and-inverted-annihilation low = refl
-and-inverted-annihilation high = refl
+--inverted identity
+¬[b∧I]≡¬b : ∀ (b : Bit) → ¬ (b ∧ I) ≡ ¬ b
+¬[b∧I]≡¬b O = refl
+¬[b∧I]≡¬b I = refl
 
 
 
-and-double-negation-compat : ∀ (a b : Bit) → ¬ (¬ (a ∧ b)) ≡ a ∧ b
-and-double-negation-compat low b = refl
-and-double-negation-compat high b rewrite not-involution b = refl
+--inverted annihilation
+¬[b∧O]≡I : ∀ (b : Bit) → ¬ (b ∧ O) ≡ I
+¬[b∧O]≡I O = refl
+¬[b∧O]≡I I = refl
 
 
 
---inversion symmetry (if two wires are opposites their ∧ is always low)
-and-inversion-symmetry : ∀ a b → (a ≢ b) → (a ∧ b ≡ low)
-and-inversion-symmetry low b a≢b = refl
-and-inversion-symmetry high low a≢b = refl
-and-inversion-symmetry high high a≢b = ⊥-elim (a≢b refl)
+--double negation compatibility
+¬[¬[a∧b]]≡a∧b : ∀ (a b : Bit) → ¬ (¬ (a ∧ b)) ≡ a ∧ b
+¬[¬[a∧b]]≡a∧b O b = refl
+¬[¬[a∧b]]≡a∧b I b rewrite ¬¬b≡b b = refl
+
+
+
+--inversion symmetry (if two wires are opposites their ∧ is always O)
+a≢b→a∧b≡0 : ∀ a b → (a ≢ b) → (a ∧ b ≡ O)
+a≢b→a∧b≡0 O b a≢b = refl
+a≢b→a∧b≡0 I O a≢b = refl
+a≢b→a∧b≡0 I I a≢b = ⊥-elim (a≢b refl)
 
 
 
 --compositional stability: congruence (if sub-circuits are equivalent, ∧ preserves that equivalence)
-and-congruence : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∧ c) ≡ (b ∧ d)
-and-congruence refl refl = refl
+∧-congruence : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∧ c) ≡ (b ∧ d)
+∧-congruence refl refl = refl
 
-and-congruence′ : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∧ c) ≡ (b ∧ d)
-and-congruence′ {a} {b} {c} {d} a≡b c≡d =
+∧-congruence′ : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∧ c) ≡ (b ∧ d)
+∧-congruence′ {a} {b} {c} {d} a≡b c≡d =
   begin
     a ∧ c
   ≡⟨ cong (_∧ c) a≡b ⟩
@@ -122,46 +124,50 @@ and-congruence′ {a} {b} {c} {d} a≡b c≡d =
 
 
 --compositional stability: reflexivity of ∧
-and-reflexivity : ∀ {a b} → a ≡ b → (a ∧ a) ≡ (b ∧ b)
-and-reflexivity refl = refl
+∧-reflexivity : ∀ {a b} → a ≡ b → (a ∧ a) ≡ (b ∧ b)
+∧-reflexivity refl = refl
 
-and-reflexivity′ : ∀ {a b} → a ≡ b → (a ∧ a) ≡ (b ∧ b)
-and-reflexivity′ {a} {b} a≡b rewrite cong (_∧ a) a≡b | cong (b ∧_) a≡b = refl
+∧-reflexivity′ : ∀ {a b} → a ≡ b → (a ∧ a) ≡ (b ∧ b)
+∧-reflexivity′ {a} {b} a≡b rewrite cong (_∧ a) a≡b
+                                 | cong (b ∧_) a≡b
+                                 = refl
 
 
 
 --compositional stability: substitution
-and-substitution : ∀ {a b c} → a ≡ b → (c ∧ a) ≡ (c ∧ b)
-and-substitution refl = refl
+∧-substitution : ∀ {a b c} → a ≡ b → (c ∧ a) ≡ (c ∧ b)
+∧-substitution refl = refl
 
-and-substitution′ : ∀ {a b c} → a ≡ b → (c ∧ a) ≡ (c ∧ b)
-and-substitution′ {a} {b} {c} a≡b rewrite cong (c ∧_) a≡b = refl
+∧-substitution′ : ∀ {a b c} → a ≡ b → (c ∧ a) ≡ (c ∧ b)
+∧-substitution′ {a} {b} {c} a≡b rewrite cong (c ∧_) a≡b = refl
 
 
 
 --soundness
---high output of an and gate implies that both of its inputs must also be high
---low output of an and gate implies that one of its inputs must be low
-and-soundnessˡ : ∀ a → a ∧ high ≡ high → a ≡ high
-and-soundnessˡ high out-high = refl
+--I output of an and gate implies that both of its inputs must also be I
+--O output of an and gate implies that one of its inputs must be O
+∧-soundnessˡ : ∀ a → a ∧ I ≡ I → a ≡ I
+∧-soundnessˡ I out-I = refl
 
-and-soundnessʳ : ∀ b → high ∧ b ≡ high → b ≡ high
-and-soundnessʳ high out-high = refl
+∧-soundnessʳ : ∀ b → I ∧ b ≡ I → b ≡ I
+∧-soundnessʳ I out-I = refl
 
-and-soundness-high : ∀ a b → a ∧ b ≡ high → a ≡ high × b ≡ high
-and-soundness-high high high out-high = ⟨ refl , refl ⟩
+∧-soundness-I : ∀ a b → a ∧ b ≡ I → a ≡ I × b ≡ I
+∧-soundness-I I I out-I = ⟨ refl , refl ⟩
 
-and-soundness-low : ∀ a b → a ∧ b ≡ low → a ≡ low ⊎ b ≡ low
-and-soundness-low low b out-low = inj₁ refl
-and-soundness-low high low out-low = inj₂ refl
+∧-soundness-O : ∀ a b → a ∧ b ≡ O → a ≡ O ⊎ b ≡ O
+∧-soundness-O O b out-O = inj₁ refl
+∧-soundness-O I O out-O = inj₂ refl
 
 
 
 --absorption
-and-absorption₁ : ∀ a b → a ∧ (¬ a ∧ b) ≡ low
-and-absorption₁ a b rewrite and-assoc a (¬ a) b
-                          | and-contradiction a = refl
+a∧[¬a∧b]≡O : ∀ a b → a ∧ (¬ a ∧ b) ≡ O
+a∧[¬a∧b]≡O a b rewrite ∧-assoc a (¬ a) b
+                     | b∧¬b≡O a
+                     = refl
 
-and-absorption₂ : ∀ a b → a ∧ (b ∧ ¬ a) ≡ low
-and-absorption₂ a b rewrite and-comm b (¬ a)
-                          | and-absorption₁ a b = refl
+a∧[b∧¬a]≡O : ∀ a b → a ∧ (b ∧ ¬ a) ≡ O
+a∧[b∧¬a]≡O a b rewrite ∧-comm b (¬ a)
+                     | a∧[¬a∧b]≡O a b
+                     = refl

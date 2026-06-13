@@ -2,11 +2,11 @@ module HardwareVerification.OrGate where
 
 
 
-open import HardwareVerification.Bit using (Bit; low; high)
+open import HardwareVerification.Bit using (Bit; O; I)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; cong)
-open import HardwareVerification.NotGate using (¬; not-involution)
-open import Data.Empty using (⊥-elim)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
+open import HardwareVerification.NotGate using (¬; ¬¬b≡b)
+open import Data.Empty using (⊥-elim)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_) renaming (_,_ to ⟨_,_⟩)
 open import HardwareVerification.AndGate using (_∧_)
@@ -14,104 +14,106 @@ open import HardwareVerification.AndGate using (_∧_)
 
 
 _∨_ : Bit → Bit → Bit
-low ∨ b = b
-high ∨ b = high
+O ∨ b = b
+I ∨ b = I
 
 infixr 5 _∨_
 
 
 
 --truth table conformance
-_ : low ∨ low ≡ low
+_ : O ∨ O ≡ O
 _ = refl
 
-_ : low ∨ high ≡ high
+_ : O ∨ I ≡ I
 _ = refl
 
-_ : high ∨ low ≡ high
+_ : I ∨ O ≡ I
 _ = refl
 
-_ : high ∨ high ≡ high
+_ : I ∨ I ≡ I
 _ = refl
 
 
 
-or-comm : ∀ (a b : Bit) → a ∨ b ≡ b ∨ a
-or-comm low low = refl
-or-comm low high = refl
-or-comm high low = refl
-or-comm high high = refl
+∨-comm : ∀ (a b : Bit) → a ∨ b ≡ b ∨ a
+∨-comm O O = refl
+∨-comm O I = refl
+∨-comm I O = refl
+∨-comm I I = refl
 
 
 
-or-assoc : ∀ (a b c : Bit) → a ∨ (b ∨ c) ≡ (a ∨ b) ∨ c
-or-assoc low b c = refl
-or-assoc high b c = refl
+∨-assoc : ∀ (a b c : Bit) → a ∨ (b ∨ c) ≡ (a ∨ b) ∨ c
+∨-assoc O b c = refl
+∨-assoc I b c = refl
 
 
 
---redundant inputs can be treated as a single wire
-or-idempotent : ∀ (b : Bit) → b ∨ b ≡ b
-or-idempotent low = refl
-or-idempotent high = refl
+--idempotence: redundant inputs can be treated as a single wire
+b∨b≡b : ∀ (b : Bit) → b ∨ b ≡ b
+b∨b≡b O = refl
+b∨b≡b I = refl
 
 
 
 --a pin tied to ground doesn't change the signal
-or-identityˡ : ∀ (b : Bit) → low ∨ b ≡ b
-or-identityˡ b = refl
+∨-identityˡ : ∀ (b : Bit) → O ∨ b ≡ b
+∨-identityˡ b = refl
 
-or-identityʳ : ∀ (b : Bit) → b ∨ low ≡ b
-or-identityʳ b rewrite or-comm b low = refl
+∨-identityʳ : ∀ (b : Bit) → b ∨ O ≡ b
+∨-identityʳ b rewrite ∨-comm b O = refl
 
 
 
---a pin tied to Vcc forces the output to high
-or-annihilation : ∀ (b : Bit) → b ∨ high ≡ high
-or-annihilation b rewrite or-comm b high = refl
+--annihilation: a pin tied to Vcc forces the output to I
+b∨I≡I : ∀ (b : Bit) → b ∨ I ≡ I
+b∨I≡I b rewrite ∨-comm b I = refl
 
 
 
 --contradiction, also known as the law of excluded middle in the context of classical logic
-or-contradiction : ∀ (b : Bit) → b ∨ ¬ b ≡ high
-or-contradiction low = refl
-or-contradiction high = refl
+b∨¬b≡I : ∀ (b : Bit) → b ∨ ¬ b ≡ I
+b∨¬b≡I O = refl
+b∨¬b≡I I = refl
 
 
 
-or-inverted-identity : ∀ (b : Bit) → ¬ (b ∨ low) ≡ ¬ b
-or-inverted-identity low = refl
-or-inverted-identity high = refl
+--inverted identity
+¬[b∨O]≡¬b : ∀ (b : Bit) → ¬ (b ∨ O) ≡ ¬ b
+¬[b∨O]≡¬b O = refl
+¬[b∨O]≡¬b I = refl
 
 
 
-or-inverted-annihilation : ∀ (b : Bit) → ¬ (b ∨ high) ≡ low
-or-inverted-annihilation low = refl
-or-inverted-annihilation high = refl
+--inverted annihilation
+¬[b∨I]≡O : ∀ (b : Bit) → ¬ (b ∨ I) ≡ O
+¬[b∨I]≡O O = refl
+¬[b∨I]≡O I = refl
 
 
 
 --double negation compatibility
-or-double-negation-compat : ∀ (a b : Bit) → ¬ (¬ (a ∨ b)) ≡ a ∨ b
-or-double-negation-compat low b rewrite not-involution b = refl
-or-double-negation-compat high b = refl
+¬[¬[a∨b]]≡a∨b : ∀ (a b : Bit) → ¬ (¬ (a ∨ b)) ≡ a ∨ b
+¬[¬[a∨b]]≡a∨b O b rewrite ¬¬b≡b b = refl
+¬[¬[a∨b]]≡a∨b I b = refl
 
 
 
---inversion symmetry (if two wires are opposites their ∨ is always high)
-or-inversion-symmetry : ∀ a b → (a ≢ b) → (a ∨ b ≡ high)
-or-inversion-symmetry low low a≢b = ⊥-elim (a≢b refl)
-or-inversion-symmetry low high a≢b = refl
-or-inversion-symmetry high b a≢b = refl
+--inversion symmetry (if two wires are opposites their ∨ is always I)
+a≢b→a∨b≡I : ∀ a b → (a ≢ b) → (a ∨ b ≡ I)
+a≢b→a∨b≡I O O a≢b = ⊥-elim (a≢b refl)
+a≢b→a∨b≡I O I a≢b = refl
+a≢b→a∨b≡I I b a≢b = refl
 
 
 
 --compositional stability: congruence (if sub-circuits are equivalent, ∨ preserves that equivalence)
-or-congruence : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∨ c) ≡ (b ∨ d)
-or-congruence refl refl = refl
+∨-congruence : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∨ c) ≡ (b ∨ d)
+∨-congruence refl refl = refl
 
-or-congruence′ : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∨ c) ≡ (b ∨ d)
-or-congruence′ {a} {b} {c} {d} a≡b c≡d =
+∨-congruence′ : ∀ {a b c d} → a ≡ b → c ≡ d → (a ∨ c) ≡ (b ∨ d)
+∨-congruence′ {a} {b} {c} {d} a≡b c≡d =
   begin
     a ∨ c
   ≡⟨ cong (_∨ c) a≡b ⟩
@@ -123,97 +125,101 @@ or-congruence′ {a} {b} {c} {d} a≡b c≡d =
 
 
 --compositional stability: reflexivity of ∨
-or-reflexivity : ∀ {a b} → a ≡ b → (a ∨ a) ≡ (b ∨ b)
-or-reflexivity refl = refl
+∨-reflexivity : ∀ {a b} → a ≡ b → (a ∨ a) ≡ (b ∨ b)
+∨-reflexivity refl = refl
 
-or-reflexivity′ : ∀ {a b} → a ≡ b → (a ∨ a) ≡ (b ∨ b)
-or-reflexivity′ {a} {b} a≡b rewrite cong (_∨ a) a≡b | cong (b ∨_) a≡b = refl
+∨-reflexivity′ : ∀ {a b} → a ≡ b → (a ∨ a) ≡ (b ∨ b)
+∨-reflexivity′ {a} {b} a≡b rewrite cong (_∨ a) a≡b
+                                 | cong (b ∨_) a≡b
+                                 = refl
 
 
 
 --compositional stability: substitution
-or-substitution : ∀ {a b c} → a ≡ b → (c ∨ a) ≡ (c ∨ b)
-or-substitution refl = refl
+∨-substitution : ∀ {a b c} → a ≡ b → (c ∨ a) ≡ (c ∨ b)
+∨-substitution refl = refl
 
-or-substitution′ : ∀ {a b c} → a ≡ b → (c ∨ a) ≡ (c ∨ b)
-or-substitution′ {a} {b} {c} a≡b rewrite cong (c ∨_) a≡b = refl
+∨-substitution′ : ∀ {a b c} → a ≡ b → (c ∨ a) ≡ (c ∨ b)
+∨-substitution′ {a} {b} {c} a≡b rewrite cong (c ∨_) a≡b = refl
 
 
 
 --soundness
---low output of an or gate implies that both of its inputs must also be low
---high output of an or gate implies that one of its inputs must be high
-or-soundnessˡ : ∀ a → a ∨ low ≡ low → a ≡ low
-or-soundnessˡ low out-low = refl
+--O output of an or gate implies that both of its inputs must also be O
+--I output of an or gate implies that one of its inputs must be I
+∨-soundnessˡ : ∀ a → a ∨ O ≡ O → a ≡ O
+∨-soundnessˡ O out-O = refl
 
-or-soundnessʳ : ∀ b → low ∨ b ≡ low → b ≡ low
-or-soundnessʳ low out-low = refl
+∨-soundnessʳ : ∀ b → O ∨ b ≡ O → b ≡ O
+∨-soundnessʳ O out-O = refl
 
-or-soundness-high : ∀ a b → a ∨ b ≡ high → a ≡ high ⊎ b ≡ high
-or-soundness-high low high out-high = inj₂ refl
-or-soundness-high high b out-high = inj₁ refl
+∨-soundness-I : ∀ a b → a ∨ b ≡ I → a ≡ I ⊎ b ≡ I
+∨-soundness-I O I out-I = inj₂ refl
+∨-soundness-I I b out-I = inj₁ refl
 
-or-soundness-low : ∀ a b → a ∨ b ≡ low → a ≡ low × b ≡ low
-or-soundness-low low low out-low = ⟨ refl , refl ⟩
+∨-soundness-O : ∀ a b → a ∨ b ≡ O → a ≡ O × b ≡ O
+∨-soundness-O O O out-O = ⟨ refl , refl ⟩
 
 
 
 --absorption
-or-absorption₁ : ∀ a b → a ∨ (¬ a ∨ b) ≡ high
-or-absorption₁ a b rewrite or-assoc a (¬ a) b
-                         | or-contradiction a = refl
+a∨[¬a∨b]≡I : ∀ a b → a ∨ (¬ a ∨ b) ≡ I
+a∨[¬a∨b]≡I a b rewrite ∨-assoc a (¬ a) b
+                     | b∨¬b≡I a
+                     = refl
 
-or-absorption₂ : ∀ a b → a ∨ (b ∨ ¬ a) ≡ high
-or-absorption₂ a b rewrite or-comm b (¬ a)
-                         | or-absorption₁ a b = refl
+a∨[b∨¬a]≡I : ∀ a b → a ∨ (b ∨ ¬ a) ≡ I
+a∨[b∨¬a]≡I a b rewrite ∨-comm b (¬ a)
+                     | a∨[¬a∨b]≡I a b
+                     = refl
 
 
 
 --De Morgan's laws
-de-morgan-∨ : ∀ a b → ¬ (a ∨ b) ≡ (¬ a ∧ ¬ b)
-de-morgan-∨ low b = refl
-de-morgan-∨ high b = refl
+¬[a∨b]≡¬a∧¬b : ∀ a b → ¬ (a ∨ b) ≡ (¬ a ∧ ¬ b)
+¬[a∨b]≡¬a∧¬b O b = refl
+¬[a∨b]≡¬a∧¬b I b = refl
 
-de-morgan-∧ : ∀ a b → ¬ (a ∧ b) ≡ (¬ a ∨ ¬ b)
-de-morgan-∧ low b = refl
-de-morgan-∧ high b = refl
+¬[a∧b]≡¬a∨¬b : ∀ a b → ¬ (a ∧ b) ≡ (¬ a ∨ ¬ b)
+¬[a∧b]≡¬a∨¬b O b = refl
+¬[a∧b]≡¬a∨¬b I b = refl
 
 
 
---distributivity: or over and
+--distributivity: ∨ over ∧
 distrib-∨∧ : ∀ a b c → a ∨ (b ∧ c) ≡ (a ∨ b) ∧ (a ∨ c)
-distrib-∨∧ low b c = refl
-distrib-∨∧ high b c = refl
+distrib-∨∧ O b c = refl
+distrib-∨∧ I b c = refl
 
---distributivity: and over or
+--distributivity: ∧ over ∨
 distrib-∧∨ : ∀ a b c → a ∧ (b ∨ c) ≡ (a ∧ b) ∨ (a ∧ c)
-distrib-∧∨ low b c = refl
-distrib-∧∨ high b c = refl
+distrib-∧∨ O b c = refl
+distrib-∧∨ I b c = refl
 
 
 
 --absorption ∨ and ∧
-absorption-∨∧ : ∀ a b → a ∨ (a ∧ b) ≡ a
-absorption-∨∧ low b = refl
-absorption-∨∧ high b = refl
+a∨[a∧b]≡a : ∀ a b → a ∨ (a ∧ b) ≡ a
+a∨[a∧b]≡a O b = refl
+a∨[a∧b]≡a I b = refl
 
 --absorption ∧ and ∨
-absorption-∧∨ : ∀ a b → a ∧ (a ∨ b) ≡ a
-absorption-∧∨ low b = refl
-absorption-∧∨ high b = refl
+a∧[a∨b]≡a : ∀ a b → a ∧ (a ∨ b) ≡ a
+a∧[a∨b]≡a O b = refl
+a∧[a∨b]≡a I b = refl
 
 
 
 --redundancy
-redundancy : ∀ a b → a ∨ (¬ a ∧ b) ≡ a ∨ b
-redundancy low b = refl
-redundancy high b = refl
+a∨[¬a∧b]≡a∨b : ∀ a b → a ∨ (¬ a ∧ b) ≡ a ∨ b
+a∨[¬a∧b]≡a∨b O b = refl
+a∨[¬a∧b]≡a∨b I b = refl
 
 
 
 --consensus theorem, useful to drop (∨ (b ∧ c)) to simplify circuits
 consensus : ∀ a b c → (a ∧ b) ∨ (¬ a ∧ c) ∨ (b ∧ c) ≡ (a ∧ b) ∨ (¬ a ∧ c)
-consensus low low c rewrite or-identityʳ c = refl
-consensus low high c rewrite or-idempotent c = refl
-consensus high low c = refl
-consensus high high c = refl
+consensus O O c rewrite ∨-identityʳ c = refl
+consensus O I c rewrite b∨b≡b c = refl
+consensus I O c = refl
+consensus I I c = refl

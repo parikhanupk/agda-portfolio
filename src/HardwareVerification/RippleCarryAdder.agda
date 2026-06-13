@@ -2,19 +2,14 @@ module HardwareVerification.RippleCarryAdder where
 
 
 
-open import Data.Vec using (Vec; []; _∷_; length)
-open import HardwareVerification.Bit using (Bit; low; high; valB)
+open import Data.Vec using (Vec; []; _∷_)
+open import HardwareVerification.Bit using (Bit; O; I; valB)
+open import HardwareVerification.FullAdder using (FA; FA-valid)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_)
-open import Data.Nat.Properties using (+-identityʳ; *-identityʳ; *-comm; +-assoc; +-comm; *-assoc; *-distribˡ-+)
-open import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
-open import HardwareVerification.FullAdder using (FA; valFA; valFA₁≡suc[valFA₀]; FA-valid)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; sym; subst)
+open import Data.Nat.Properties using (+-identityʳ; +-comm; +-assoc; *-assoc; *-distribˡ-+)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; sym)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-open import HardwareVerification.AndGate using (_∧_; and-comm; and-identityʳ)
-open import HardwareVerification.OrGate using (_∨_; or-comm; or-annihilation; or-contradiction)
-open import HardwareVerification.XorGate using (_⊕_; xor-comm; xor-distrib-and; xor-identityʳ; xor-fixed-high)
-open import HardwareVerification.NotGate using (¬)
-open import Data.Product using (∃-syntax)
+open import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
 
 
 
@@ -22,6 +17,7 @@ open import Data.Product using (∃-syntax)
 Word = Vec Bit
 
 --semantics or mathematical meaning of Word with LSB on the left
+--pv is the place value in a positional base 2 number system
 valc : {n : ℕ} → (k pv : ℕ) → pv ≡ 2 ^ k → Word n → ℕ
 valc {zero} k pv pow2  [] = 0
 valc {suc n} k pv pow2 (w ∷ W) = (pv * (valB w)) + valc (suc k) (2 * pv) (cong (2 *_) pow2) W
@@ -38,8 +34,6 @@ RCA (a ∷ A) (b ∷ B) Cᵢₙ =
       ⟨ cᵣ , sᵣ ⟩ = RCA A B c₀
   in ⟨ cᵣ , (s₀ ∷ sᵣ) ⟩
 
-
-
 --semantics or mathematical meaning
 valRCA : {n : ℕ} → (A B : Word n) → (Cᵢₙ : Bit) → ℕ
 valRCA {n} A B Cᵢₙ = let ⟨ Cₒᵤₜ , Sum ⟩ = RCA A B Cᵢₙ
@@ -47,9 +41,9 @@ valRCA {n} A B Cᵢₙ = let ⟨ Cₒᵤₜ , Sum ⟩ = RCA A B Cᵢₙ
 
 
 
-A = low ∷ high ∷ high ∷ []
-B = high ∷ low ∷ high ∷ []
-Cᵢₙ = low
+A = O ∷ I ∷ I ∷ []
+B = I ∷ O ∷ I ∷ []
+Cᵢₙ = O
 
 _ : valW A ≡ 6
 _ = refl
@@ -57,7 +51,7 @@ _ = refl
 _ : valW B ≡ 5
 _ = refl
 
-_ : RCA A B Cᵢₙ ≡ ⟨ high , high ∷ high ∷ low ∷ [] ⟩
+_ : RCA A B Cᵢₙ ≡ ⟨ I , I ∷ I ∷ O ∷ [] ⟩
 _ = refl
 
 _ : valW A + valW B + valB Cᵢₙ ≡ valRCA A B Cᵢₙ
@@ -92,7 +86,8 @@ lemma-pv {suc n} k pv pow2 (w ∷ W) =
 a+[b+c]≡b+[a+c] : ∀ (a b c : ℕ) → a + (b + c) ≡ b + (a + c)
 a+[b+c]≡b+[a+c] a b c rewrite sym (+-assoc a b c)
                             | +-comm a b
-                            | +-assoc b a c = refl
+                            | +-assoc b a c
+                            = refl
 
 
 
@@ -145,12 +140,16 @@ RCA-valid {suc n} (a ∷ A) (b ∷ B) Cᵢₙ =
     (2 * ((valW A) + (valW B))) + (valB a + valB b + valB Cᵢₙ)
   ≡⟨ cong₂ (λ x y → x + y) (*-distribˡ-+ 2 (valW A) (valW B)) refl ⟩
     (2 * (valW A) + 2 * (valW B)) + (valB a + valB b + valB Cᵢₙ)
-  ≡⟨ cong₂ (λ x y → x + y + (valB a + valB b + valB Cᵢₙ)) (lemma-pv 0 1 refl A) (lemma-pv 0 1 refl B) ⟩
+  ≡⟨ cong₂ (λ x y → x + y + (valB a + valB b + valB Cᵢₙ))
+           (lemma-pv 0 1 refl A)
+           (lemma-pv 0 1 refl B) ⟩
     ((valc 1 2 refl A) + (valc 1 2 refl B)) + (valB a + valB b + valB Cᵢₙ)
   ≡⟨ sym (+-assoc ((valc 1 2 refl A) + (valc 1 2 refl B)) (valB a + valB b) (valB Cᵢₙ)) ⟩
     ((valc 1 2 refl A) + (valc 1 2 refl B)) + (valB a + valB b) + valB Cᵢₙ
   ≡⟨ cong (_+ valB Cᵢₙ) ([a+b]+[c+d]≡[c+a]+[d+b] (valc 1 2 refl A) (valc 1 2 refl B) (valB a) (valB b)) ⟩
     (valB a + (valc 1 2 refl A)) + (valB b + (valc 1 2 refl B)) + valB Cᵢₙ
-  ≡⟨ cong₂ (λ x y → (x + (valc 1 2 refl A)) + (y + valc 1 2 refl B) + valB Cᵢₙ) (sym (+-identityʳ (valB a))) (sym (+-identityʳ (valB b))) ⟩
+  ≡⟨ cong₂ (λ x y → (x + (valc 1 2 refl A)) + (y + valc 1 2 refl B) + valB Cᵢₙ)
+           (sym (+-identityʳ (valB a)))
+           (sym (+-identityʳ (valB b))) ⟩
     valW (a ∷ A) + valW (b ∷ B) + valB Cᵢₙ
   ∎
