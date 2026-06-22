@@ -6,8 +6,8 @@
 | ---------------------| ------------------------------------------------------------------------------------------------ |
 | **Operating System** | GNU/Linux based system [1]                                                                       |
 | **Language**         | [Agda (2.8.0)](https://github.com/agda/agda)                                                     |
-| **Standard Library** | [agda-stdlib (2.3)](https://github.com/agda/agda-stdlib)                                         |
-| **Editor**           | [emacs](https://www.gnu.org/software/emacs/)                                                     |
+| **Standard Library** | [Agda standard library (2.3)](https://github.com/agda/agda-stdlib)                           |
+| **Editor**           | [Emacs](https://www.gnu.org/software/emacs/)                                                     |
 | **Tooling**          | Verified via [GitHub Actions](https://docs.github.com/en/actions) on every push and pull request |
 
 *[1]: especially for some scripts such as clean, extract-all, and test-before-commit.*
