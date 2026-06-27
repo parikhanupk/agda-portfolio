@@ -1,9 +1,17 @@
-# Agda interface files
-*.agdai
+_build
+
+_compile
+
+demo/demo.so
+
+_extract
 
 # Emacs backup files
 *~
 # #*#
+
+# Agda interface files
+*.agdai
 
 # macOS system files
 .DS_Store

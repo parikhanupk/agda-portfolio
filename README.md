@@ -6,7 +6,7 @@
 | ---------------------| ------------------------------------------------------------------------------------------------ |
 | **Operating System** | GNU/Linux based system [1]                                                                       |
 | **Language**         | [Agda (2.8.0)](https://github.com/agda/agda)                                                     |
-| **Standard Library** | [Agda standard library (2.3)](https://github.com/agda/agda-stdlib)                           |
+| **Standard Library** | [Agda standard library (2.3)](https://github.com/agda/agda-stdlib)                               |
 | **Editor**           | [Emacs](https://www.gnu.org/software/emacs/)                                                     |
 | **Tooling**          | Verified via [GitHub Actions](https://docs.github.com/en/actions) on every push and pull request |
 
@@ -38,6 +38,8 @@ Work in progress, but did various proofs around the following:
 1. Basic stuff like Not, And, Or, Nand, and Xor
 2. [Full Adder](src/HardwareVerification/FullAdder.agda)
 3. [Ripple Carry Adder](src/HardwareVerification/RippleCarryAdder.agda)
+
+And, a demo that calls Agda verified function(s) from Python. Please note that this demo is primarily a learning tool and I don't yet understand a lot of what makes Agda to Haskell to C to Python FFI work. Currently, this demo only calls the verified Ripple Carry Adder.
 
 ## Background
 

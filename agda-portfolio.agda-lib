@@ -1,4 +1,6 @@
 name: agda-portfolio
-include: src
+include:
+  src
+  demo
 depend: standard-library
 

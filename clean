@@ -8,13 +8,28 @@ echo "done"
 
 
 
+echo -n "deleting _compile ... " &&
+rm -rf _compile &&
+echo "done"
+
+
+
+echo -n "deleting demo/demo.so ... " &&
+rm -f demo/demo.so &&
+echo "done"
+
+
+
 echo -n "deleting _extract ... " &&
 rm -rf _extract &&
 echo "done"
 
 
 
-echo "deleting emacs backup files in src:" &&
+echo "deleting emacs backup files:" &&
 find src -name "*~" -type f -print -delete &&
+find src -name "#*#" -type f -print -delete &&
+find demo -name "*~" -type f -print -delete &&
+find demo -name "#*#" -type f -print -delete &&
 echo "done"
 

@@ -1,14 +1,36 @@
 #!/bin/sh
 
-echo "==> [AGDA] Type-checking library manifest ..."
+echo "Running type-check ..."
 
 agda --build-library
 
 if [ $? -ne 0 ]; then
-    echo "ERROR: Agda type-checking failed! Do not commit."
+    echo "ERROR: type-check failed! Do not commit."
     exit 1
 fi
 
-echo "SUCCESS: Agda type-checking succeeded! Ready to commit."
+
+
+echo "Running compile-demo ..."
+
+agda --compile \
+     --compile-dir=_compile \
+     --ghc-flag="-dynamic" \
+     --ghc-flag="-shared" \
+     --ghc-flag="-fPIC" \
+     --ghc-flag="-flink-rts" \
+     --ghc-flag="-no-hs-main" \
+     --ghc-flag="-o" \
+     --ghc-flag="demo/demo.so" \
+     demo/Demo.agda
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: compile-demo failed! Do not commit."
+    exit 1
+fi
+
+
+
+echo "SUCCESS: okay to commit."
 exit 0
 
