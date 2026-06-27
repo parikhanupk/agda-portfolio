@@ -31,23 +31,24 @@ try:
     agda_lib.hs_init(None, None)
     ok, err = 0, 0
     for bits in range(1, 9):
-        for i in range(2 ** bits):
-            for j in range(2 ** bits):
-                ri, rj = f"{i:0{bits}b}"[::-1], f"{j:0{bits}b}"[::-1]
-                rca_in = f"rca {ri} {rj} 0".encode("utf-8")
-                rca_out = call_agda_process(agda_lib, rca_in)
-                if rca_out.startswith("Carry="):
-                    rca_carry, rca_sum = rca_out.split(" ")
-                    rca_carry, rca_sum = rca_carry[-1:], rca_sum[-bits:][::-1]
-                    if ((int(rca_carry) * (2 ** bits)) + int(rca_sum, 2)) == (i + j):
-                        ok += 1
-                        print("OK:", "carry = 0,", i, "+", j, "=", rca_carry, rca_sum)
+        for c in range(2):
+            for a in range(2 ** bits):
+                for b in range(2 ** bits):
+                    ra, rb = f"{a:0{bits}b}"[::-1], f"{b:0{bits}b}"[::-1]
+                    rca_in = f"rca {ra} {rb} {c}".encode("utf-8")
+                    rca_out = call_agda_process(agda_lib, rca_in)
+                    if rca_out.startswith("Carry="):
+                        rca_carry, rca_sum = rca_out.split(" ")
+                        rca_carry, rca_sum = rca_carry[-1:], rca_sum[-bits:][::-1]
+                        if ((int(rca_carry) * (2 ** bits)) + int(rca_sum, 2)) == (a + b + c):
+                            ok += 1
+                            print("OK:", "carry =", c, "+", a, "+", b, "=", rca_carry, rca_sum)
+                        else:
+                            err += 1
+                            print("ERR:", "carry =", c, "+", a, "+", b, "=", rca_carry, rca_sum)
                     else:
-                        err += 1
-                        print("ERR:", "carry = 0,", i, "+", j, "=", rca_carry, rca_sum)
-                else:
-                    print(rca_out)
-    print(ok, "tests passed", err, "tests failed")
+                        print(rca_out)
+    print(ok, "tests passed,", err, "tests failed")
 finally:
     agda_lib.hs_exit()
 
