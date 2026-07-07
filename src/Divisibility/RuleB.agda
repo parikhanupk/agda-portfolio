@@ -15,7 +15,7 @@ module Divisibility.RuleB where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _>_; _+_; _*_; _≥_; _∸_; _≤_; z≤n; s≤s; _^_; _<ᵇ_)
+open import Data.Nat using (ℕ; zero; suc; _>_; _+_; _*_; _≥_; _∸_; _≤_; z≤n; s≤s; _^_; _<ᵇ_; _≱_)
 open import Data.Nat.Properties using (+-assoc; +-identityʳ; +-comm; *-comm; *-distribˡ-+; +-∸-assoc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst; sym; _≢_)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
@@ -67,6 +67,31 @@ a≥b→a≡b+[a∸b] (suc a) (suc b) (s≤s a≥b) = cong suc (a≥b→a≡b+[a
 
 d[a∸b]→db→da : ∀ {d a b : ℕ} → (p : d > 0) → a ≥ b → Div d p (a ∸ b) → Div d p b → Div d p a
 d[a∸b]→db→da {d} {a} {b} p a≥b d[a∸b] db = subst (Div d p) (sym (a≥b→a≡b+[a∸b] a b a≥b)) (da→db→d[a+b] p db d[a∸b])
+
+
+
+d>0→0≱[d+n] : ∀ {d n : ℕ} → d > 0 → 0 ≱ (d + n)
+d>0→0≱[d+n] {zero} {n} () 0>[d+n]
+
+sa≥sb→a≥b : ∀ {a b : ℕ} → suc a ≥ suc b → a ≥ b
+sa≥sb→a≥b (s≤s a≥b) = a≥b
+
+[d+a]≥[d+b]→a≥b : ∀ {a b : ℕ} (d : ℕ) → d + a ≥ d + b → a ≥ b
+[d+a]≥[d+b]→a≥b zero a≥b = a≥b
+[d+a]≥[d+b]→a≥b (suc d) [d+a]≥[d+b] = [d+a]≥[d+b]→a≥b d (sa≥sb→a≥b [d+a]≥[d+b])
+
+a≥b→[d+a]-[d+b]≡a+b : ∀ {a b : ℕ} (d : ℕ) → a ≥ b → d + a ∸ (d + b) ≡ a ∸ b
+a≥b→[d+a]-[d+b]≡a+b zero a≥b = refl
+a≥b→[d+a]-[d+b]≡a+b (suc d) a≥b = a≥b→[d+a]-[d+b]≡a+b d a≥b
+
+da→db→d[a∸b] : ∀ {d a b : ℕ} → (p : d > 0) → a ≥ b → Div d p a → Div d p b → Div d p (a ∸ b)
+da→db→d[a∸b] {d} {.(zero)} {.(zero)} p 0≥0 dz dz = dz
+da→db→d[a∸b] {d} {.(zero)} {.(d + n)} d>0 0≥[d+n] dz (ds {n} dn) = ⊥-elim (d>0→0≱[d+n] d>0 0≥[d+n])
+da→db→d[a∸b] {d} {.(d + n)} {.(zero)} p [d+n]≥0 (ds {n} dn) dz = ds dn
+da→db→d[a∸b] {d} {.(d + a')} {.(d + b')} p d+a'≥d+b' (ds {a'} da') (ds {b'} db') =
+             subst (Div d p)
+                   (sym (a≥b→[d+a]-[d+b]≡a+b d ([d+a]≥[d+b]→a≥b d d+a'≥d+b')))
+                   (da→db→d[a∸b] p ([d+a]≥[d+b]→a≥b d d+a'≥d+b') da' db')
 
 
 
