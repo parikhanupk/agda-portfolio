@@ -3,12 +3,12 @@ module Utilities where
 
 
 open import Data.Bool using (Bool; true; false; _∧_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; sym)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
-open import Data.Nat using (ℕ; _*_; _^_)
-open import Data.Nat.Properties using (*-identityʳ)
+open import Data.Nat using (ℕ; _+_; _*_; _^_)
+open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm)
 
 
 
@@ -52,3 +52,19 @@ _³ = _^ 3
 
 a²≡a*a : ∀ (a : ℕ) → a ² ≡ a * a
 a²≡a*a a rewrite *-identityʳ a = refl
+
+
+
++-swap : ∀ (a b c : ℕ) → a + b + c ≡ a + c + b
++-swap a b c rewrite +-assoc a b c
+                   | +-comm b c
+                   | sym (+-assoc a c b)
+                   = refl
+
+
+
+*-swap : ∀ (a b c : ℕ) → a * b * c ≡ a * c * b
+*-swap a b c rewrite *-assoc a b c
+                   | *-comm b c
+                   | sym (*-assoc a c b)
+                   = refl

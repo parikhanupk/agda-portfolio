@@ -39,6 +39,19 @@ Work in progress, but did various proofs around the following:
 2. [Full Adder](src/HardwareVerification/FullAdder.agda)
 3. [Ripple Carry Adder](src/HardwareVerification/RippleCarryAdder.agda)
 
+#### 8. [src/Naturals](src/Naturals)
+Work in progress, but did various proofs around the following:
+1. `fib-3n-is-even` in [EvenOdd](src/Naturals/Properties/EvenOdd.agda)
+2. `even-n→n²%4≡0 and odd-n→n²%4≡1` in [Remainder](src/Naturals/Properties/Remainder.agda)
+3. `Div2 (n ²) → Div2 n` in [Divisibility2](src/Naturals/Properties/Divisibility2.agda)
+4. `n≥4→n²≤2ⁿ` in [Power](src/Naturals/Properties/Power.agda)
+
+#### 9. [src/Series/Properties/Factorial.agda](src/Series/Properties/Factorial.agda)
+Proof that `∀ (m n : ℕ) → (m>0 : m > 0) → m ≤ n → Div m m>0 (n !)`
+
+#### 10. [src/Divisibility/EuclideanRelation.agda](src/Divisibility/EuclideanRelation.agda)
+Proof that `(a = bq + r) , (r < b) → (ak = bkq + rk) , (rk < bk)`
+
 And, a demo that calls Agda verified function(s) from Python. Please note that this demo is primarily a learning tool and I don't yet understand a lot of what makes Agda to Haskell to C to Python FFI work. Currently, this demo only calls the verified Ripple Carry Adder.
 
 ## Background

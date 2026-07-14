@@ -3,9 +3,10 @@ module Naturals.Properties.EvenOdd where
 
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _≥_; _≤_; z≤n; s≤s; _*_)
-open import Data.Nat.Properties using (+-comm; *-comm)
-open import Relation.Binary.PropositionalEquality using (_≡_; subst)
+open import Data.Nat.Properties using (+-comm; *-comm; +-identityʳ; +-assoc)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst)
 open import Data.Product using (∃-syntax; _×_; _,_)
+open import Naturals.Fibonacci using (fib)
 
 
 
@@ -50,3 +51,29 @@ odd+odd≡even {.(suc a')} {.(suc b')} (os {a'} even-a') (os {b'} even-b')
 
 *-evenʳ : ∀ {a b : ℕ} → Even a → Even (b * a)
 *-evenʳ {a} {b} even-a = subst Even (*-comm a b) (*-evenˡ even-a)
+
+
+
+even-a+a : ∀ (a : ℕ) → Even (a + a)
+even-a+a zero = eo
+even-a+a (suc a) rewrite +-comm a (suc a) = es (os (even-a+a a))
+
+
+
+n+n+n≡3*n : ∀ (n : ℕ) → n + n + n ≡ 3 * n
+n+n+n≡3*n zero = refl
+n+n+n≡3*n (suc n) rewrite +-identityʳ n
+                        | +-assoc n (suc n) (suc n)
+                        = refl
+
+
+
+fib-3n-is-even : ∀ (n : ℕ) → Even (fib (3 * n))
+fib-3n-is-even zero = eo
+fib-3n-is-even (suc n) rewrite +-identityʳ n
+                             | +-comm n (suc n)
+                             | +-comm n (suc (suc (n + n)))
+                             | +-comm (fib (suc (n + n + n))) (fib (n + n + n))
+                             | +-assoc (fib (n + n + n)) (fib (suc (n + n + n))) (fib (suc (n + n + n)))
+                             = even+even≡even (subst Even (cong fib (sym (n+n+n≡3*n n))) (fib-3n-is-even n))
+                                              (even-a+a (fib (suc (n + n + n))))
