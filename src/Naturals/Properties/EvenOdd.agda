@@ -2,11 +2,12 @@ module Naturals.Properties.EvenOdd where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _+_; _≥_; _≤_; z≤n; s≤s; _*_)
-open import Data.Nat.Properties using (+-comm; *-comm; +-identityʳ; +-assoc)
+open import Data.Nat using (ℕ; zero; suc; _+_; _≥_; _≤_; z≤n; s≤s; _*_; _^_; _>_)
+open import Data.Nat.Properties using (+-comm; *-comm; +-identityʳ; +-assoc; *-identityˡ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst)
 open import Data.Product using (∃-syntax; _×_; _,_)
 open import Naturals.Fibonacci using (fib)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 
 
@@ -54,6 +55,12 @@ odd+odd≡even {.(suc a')} {.(suc b')} (os {a'} even-a') (os {b'} even-b')
 
 
 
+*-odd-odd : ∀ {a b : ℕ} → Odd a → Odd b → Odd (a * b)
+*-odd-odd {suc zero} {b} _ odd-b rewrite +-identityʳ b = odd-b
+*-odd-odd {suc (suc a)} {b} (os (es odd-a)) odd-b = odd+even≡odd odd-b (odd+odd≡even odd-b (*-odd-odd odd-a odd-b))
+
+
+
 even-a+a : ∀ (a : ℕ) → Even (a + a)
 even-a+a zero = eo
 even-a+a (suc a) rewrite +-comm a (suc a) = es (os (even-a+a a))
@@ -77,3 +84,23 @@ fib-3n-is-even (suc n) rewrite +-identityʳ n
                              | +-assoc (fib (n + n + n)) (fib (suc (n + n + n))) (fib (suc (n + n + n)))
                              = even+even≡even (subst Even (cong fib (sym (n+n+n≡3*n n))) (fib-3n-is-even n))
                                               (even-a+a (fib (suc (n + n + n))))
+
+
+
+even-n→even-nᵖ : ∀ (n p : ℕ) → (p > 0) → Even n → Even (n ^ p)
+even-n→even-nᵖ n (suc p) sp>0 even-n = *-evenˡ even-n
+
+odd-n→odd-nᵖ : ∀ (n p : ℕ) → Odd n → Odd (n ^ p)
+odd-n→odd-nᵖ n zero _ = os eo
+odd-n→odd-nᵖ n (suc p) odd-n = *-odd-odd odd-n (odd-n→odd-nᵖ n p odd-n)
+
+even-or-odd : ∀ n → Even n ⊎ Odd n
+even-or-odd zero = inj₁ eo
+even-or-odd (suc n) with even-or-odd n
+... | inj₁ even-n = inj₂ (os even-n)
+... | inj₂ odd-n = inj₁ (es odd-n)
+
+n+nᵖ-is-even : ∀ (n p : ℕ) → p > 0 → Even (n + (n ^ p))
+n+nᵖ-is-even n p p>0 with even-or-odd n
+... | inj₁ even-n = even+even≡even even-n (even-n→even-nᵖ n p p>0 even-n)
+... | inj₂ odd-n = odd+odd≡even odd-n (odd-n→odd-nᵖ n p odd-n)

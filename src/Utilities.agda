@@ -68,3 +68,11 @@ a²≡a*a a rewrite *-identityʳ a = refl
                    | *-comm b c
                    | sym (*-assoc a c b)
                    = refl
+
+
+
+a+[b+c]≡b+[a+c] : ∀ (a b c : ℕ) → a + (b + c) ≡ b + (a + c)
+a+[b+c]≡b+[a+c] a b c rewrite sym (+-assoc a b c)
+                            | +-comm a b
+                            | +-assoc b a c
+                            = refl
