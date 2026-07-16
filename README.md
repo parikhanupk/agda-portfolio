@@ -46,6 +46,7 @@ Work in progress, but did various proofs around the following:
 3. `Div2 (n ²) → Div2 n` in [Divisibility2](src/Naturals/Properties/Divisibility2.agda)
 4. `n≥4→n²≤2ⁿ` in [Power](src/Naturals/Properties/Power.agda)
 5. `n + nᵖ` is always even in [Divisibility2](src/Naturals/Properties/Divisibility2.agda) and [EvenOdd](src/Naturals/Properties/EvenOdd.agda)
+6. `if d divides a and b, then d divides ma + nb` in [Divisibility](src/Naturals/Properties/Divisibility.agda)
 
 #### 9. [src/Series/Properties/Factorial.agda](src/Series/Properties/Factorial.agda)
 Proof that `∀ (m n : ℕ) → (m>0 : m > 0) → m ≤ n → Div m m>0 (n !)`
