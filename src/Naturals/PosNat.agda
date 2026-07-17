@@ -3,48 +3,55 @@ module Naturals.PosNat where
 
 
 open import Data.Nat using (ℕ; zero; suc; _>_; _<_; NonZero; _≤_; z≤n; s≤s; _/_; _%_; _<ᵇ_; _+_; _*_; _^_)
-open import Data.Nat.DivMod using (m/n<m)
+open import Data.Nat.DivMod using (m/n<m; m%n<n)
 open import Induction.WellFounded using (Acc; acc)
 open import Data.Nat.Induction using (<-wellFounded)
 open import Data.List using (List; []; _∷_; length)
 open import Data.Bool using (true)
 open import Data.Bool.ListAction using (all)
 open import Agda.Builtin.Unit using (tt)
-open import Relation.Binary.PropositionalEquality using (_≡_)
-open import Utilities using (all→rest)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Utilities using (all→rest; <→<ᵇ; rest→all)
 
 
 
-fromℕ-helper : (b : ℕ) → (b>1 : b > 1) → (n : ℕ) → Acc _<_ n → (cur : List ℕ) → List ℕ
-fromℕ-helper b b>1 zero _ cur = cur
-fromℕ-helper b b>1 (suc n) (acc rs) cur =
-  let
-    instance
-      _ : NonZero b
-      _ = n>1→NonZero-n b>1
-    q = (suc n) / b
-    r = (suc n) % b
-  in
-    fromℕ-helper b b>1 q (rs (m/n<m (suc n) b b>1)) (r ∷ cur)
-  where
-    n>1→NonZero-n : {b : ℕ} → b > 1 → NonZero b
-    n>1→NonZero-n (s≤s _) = record { nonZero = tt }
-
-fromℕ : (b : ℕ) → (b>1 : b > 1) → (n : ℕ) → List ℕ
-fromℕ b b>1 n = fromℕ-helper b b>1 n (<-wellFounded n) []
+data PosNat (b : ℕ) (p : b > 1) : Set where
+  posNat : (digits : List ℕ)
+         → (valid : all (_<ᵇ b) digits ≡ true)
+         → PosNat b p
 
 
 
-toℕ : (b : ℕ) → (b>1 : b > 1) → (digits : List ℕ) → (all (_<ᵇ b) digits ≡ true) → ℕ
-toℕ b b>1 [] _ = 0
-toℕ b b>1 (d ∷ digits) valid = ((b ^ (length digits)) * d)
-                             + toℕ b b>1 digits (all→rest (_<ᵇ b) d digits valid)
+module _ (b : ℕ) (p : b > 1) where
 
+  fromℕ-helper : (n : ℕ) → Acc _<_ n → PosNat b p → PosNat b p
+  fromℕ-helper zero _ cur = cur
+  fromℕ-helper (suc n) (acc rs) (posNat digits valid) =
+    let
+      instance
+        _ : NonZero b
+        _ = n>1→NonZero-n p
+      q = (suc n) / b
+      r = (suc n) % b
 
+      r<b : r < b
+      r<b = m%n<n (suc n) b
 
-{-
-from-to-id : ∀ (b : ℕ) → (b>1 : b > 1)
-             → (digits : List ℕ) → (digits<base : all (_<ᵇ b) digits ≡ true)
-             → fromℕ b b>1 (toℕ b b>1 digits digits<base) ≡ digits
-from-to-id b b>1 digits digits<base = {!!}
--}
+      new-acc = rs (m/n<m (suc n) b p)
+      new-valid = rest→all (_<ᵇ b) (suc n % b) digits (<→<ᵇ r<b) valid
+    in
+      fromℕ-helper q new-acc (posNat (r ∷ digits) new-valid)
+    where
+      n>1→NonZero-n : {n : ℕ} → n > 1 → NonZero n
+      n>1→NonZero-n (s≤s _) = record { nonZero = tt }
+
+  fromℕ : (n : ℕ) → PosNat b p
+  fromℕ n = fromℕ-helper n (<-wellFounded n) (posNat [] refl)
+
+  --needed as PosNat is a record type and Agda's termination checker doesn't see the terminating behavior
+  toℕ-helper : List ℕ → ℕ
+  toℕ-helper [] = 0
+  toℕ-helper (d ∷ digits) = ((b ^ length digits) * d) + toℕ-helper digits
+
+  toℕ : PosNat b p → ℕ
+  toℕ (posNat digits _) = toℕ-helper digits

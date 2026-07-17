@@ -7,8 +7,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
-open import Data.Nat using (ℕ; _+_; _*_; _^_)
-open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _<ᵇ_; _≤_; z≤n; s≤s)
+open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm; <⇒<ᵇ)
 
 
 
@@ -76,3 +76,10 @@ a+[b+c]≡b+[a+c] a b c rewrite sym (+-assoc a b c)
                             | +-comm a b
                             | +-assoc b a c
                             = refl
+
+
+
+
+<→<ᵇ : ∀ {m n : ℕ} → m < n → (m <ᵇ n) ≡ true
+<→<ᵇ (s≤s z≤n) = refl
+<→<ᵇ (s≤s (s≤s m<n)) = <→<ᵇ (s≤s m<n)
