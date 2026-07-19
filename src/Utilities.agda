@@ -53,6 +53,9 @@ _³ = _^ 3
 a²≡a*a : ∀ (a : ℕ) → a ² ≡ a * a
 a²≡a*a a rewrite *-identityʳ a = refl
 
+a³≡a*a*a : ∀ (a : ℕ) → a ³ ≡ a * a * a
+a³≡a*a*a a rewrite *-assoc a a a | a²≡a*a a = refl
+
 
 
 +-swap : ∀ (a b c : ℕ) → a + b + c ≡ a + c + b
