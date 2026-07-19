@@ -47,6 +47,7 @@ Work in progress, but did various proofs around the following:
 5. `n + nᵖ` is always even in [Divisibility2](src/Naturals/Properties/Divisibility2.agda) and [EvenOdd](src/Naturals/Properties/EvenOdd.agda)
 6. `if d divides a and b, then d divides ma + nb` in [Divisibility](src/Naturals/Properties/Divisibility.agda)
 7. `6 divides product of any 3 consecutive naturals` in [Puzzles](src/Puzzles/Consecutive-product-of-3-div-by-6.agda)
+8. `n≥4→2ⁿ<n!` in [Factorial](src/Naturals/Properties/Factorial.agda)
 
 #### 9. [src/Series/Properties/Factorial.agda](src/Series/Properties/Factorial.agda)
 Proof that `∀ (m n : ℕ) → (m>0 : m > 0) → m ≤ n → Div m m>0 (n !)`
