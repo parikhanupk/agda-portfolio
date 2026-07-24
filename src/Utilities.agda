@@ -7,7 +7,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
-open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _<ᵇ_; _≤_; z≤n; s≤s)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _<ᵇ_; _≤_; z≤n; s≤s; _∸_; _≥_)
 open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm; <⇒<ᵇ)
 
 
@@ -82,7 +82,69 @@ a+[b+c]≡b+[a+c] a b c rewrite sym (+-assoc a b c)
 
 
 
-
 <→<ᵇ : ∀ {m n : ℕ} → m < n → (m <ᵇ n) ≡ true
 <→<ᵇ (s≤s z≤n) = refl
 <→<ᵇ (s≤s (s≤s m<n)) = <→<ᵇ (s≤s m<n)
+
+
+
+s[a∸b]≡sa∸b : ∀ (a b : ℕ) → b ≤ a → suc (a ∸ b) ≡ suc a ∸ b
+s[a∸b]≡sa∸b a zero _ = refl
+s[a∸b]≡sa∸b (suc a) (suc b) (s≤s b≤a) = s[a∸b]≡sa∸b a b b≤a
+
+a≤b→a≤sb : ∀ (a b : ℕ) → a ≤ b → a ≤ suc b
+a≤b→a≤sb zero b _ = z≤n
+a≤b→a≤sb (suc a) (suc b) (s≤s a≤b) = s≤s (a≤b→a≤sb a b a≤b)
+
+a≤c≤b→c∸a≤b : ∀ (a b c : ℕ) → a ≤ c → c ≤ b → c ∸ a ≤ b
+a≤c≤b→c∸a≤b zero b c _ c≤b = c≤b
+a≤c≤b→c∸a≤b (suc a) (suc b) (suc c) (s≤s a≤c) (s≤s c≤b) = a≤b→a≤sb (suc c ∸ suc a) b (a≤c≤b→c∸a≤b a b c a≤c c≤b)
+
+a+[b∸c]≡b∸[c∸a] : ∀ (a b c : ℕ) → a ≤ c → c ≤ b → a + (b ∸ c) ≡ b ∸ (c ∸ a)
+a+[b∸c]≡b∸[c∸a] zero b c _ _ = refl
+a+[b∸c]≡b∸[c∸a] (suc a) (suc b) (suc c) (s≤s a≤c) (s≤s c≤b) =
+  begin
+    suc a + (suc b ∸ suc c)
+  ≡⟨ refl ⟩
+    suc (a + (b ∸ c))
+  ≡⟨ cong suc (a+[b∸c]≡b∸[c∸a] a b c a≤c c≤b) ⟩
+    suc (b ∸ (c ∸ a))
+  ≡⟨ s[a∸b]≡sa∸b b (c ∸ a) (a≤c≤b→c∸a≤b a b c a≤c c≤b) ⟩
+    suc b ∸ (c ∸ a)
+  ∎
+
+
+
+a≤b→a≤b+c : ∀ (a b c : ℕ) → a ≤ b → a ≤ b + c
+a≤b→a≤b+c zero b c z≤n = z≤n
+a≤b→a≤b+c (suc a) (suc b) c (s≤s a≤b) = s≤s (a≤b→a≤b+c a b c a≤b)
+
+
+
+c≥1→a≤b→a≤b*c : ∀ (a b c : ℕ) → c ≥ 1 → a ≤ b → a ≤ b * c
+c≥1→a≤b→a≤b*c zero zero (suc c) (s≤s z≤n) z≤n = z≤n
+c≥1→a≤b→a≤b*c zero (suc b) (suc c) (s≤s z≤n) z≤n = z≤n
+c≥1→a≤b→a≤b*c (suc a) (suc b) (suc c) (s≤s z≤n) (s≤s a≤b)
+              rewrite *-comm b (suc c)
+                    | sym (+-assoc c b (c * b))
+                    | +-comm c b
+                    | +-assoc b c (c * b)
+                    = s≤s (a≤b→a≤b+c a b (c + c * b) a≤b)
+
+a≤a : ∀ (a : ℕ) → a ≤ a
+a≤a zero = z≤n
+a≤a (suc a) = s≤s (a≤a a)
+
+a≤a*b : ∀ (a b : ℕ) → b ≥ 1 → a ≤ a * b
+a≤a*b a b b≥1 = c≥1→a≤b→a≤b*c a a b b≥1 (a≤a a)
+
+ab≥1 : ∀ (a b : ℕ) → a ≥ 1 → b ≥ 1 → a * b ≥ 1
+ab≥1 _ _ (s≤s _) (s≤s _) = s≤s z≤n
+
+saⁿ≥1 : ∀ (a n : ℕ) → suc a ^ n ≥ 1
+saⁿ≥1 a zero = s≤s z≤n
+saⁿ≥1 a (suc n) = ab≥1 (suc a) (suc a ^ n) (s≤s z≤n) (saⁿ≥1 a n)
+
+a≤aˢⁿ : ∀ (a n : ℕ) → a ≤ a ^ (suc n)
+a≤aˢⁿ zero n = z≤n
+a≤aˢⁿ (suc a) n = a≤a*b (suc a) (suc a ^ n) (saⁿ≥1 a n)
