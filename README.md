@@ -36,8 +36,9 @@ Some proofs around an IMO problem, primarily `2ⁿ ∸ 1 is divisible by 7 if an
 #### 7. [src/HardwareVerification](src/HardwareVerification)
 Work in progress, but did various proofs around the following:
 1. Basic stuff like Not, And, Or, Nand, and Xor
-2. [Full Adder](src/HardwareVerification/FullAdder.agda)
-3. [Ripple Carry Adder](src/HardwareVerification/RippleCarryAdder.agda)
+2. [Word](src/HardwareVerification/Word.agda)
+3. [Full Adder](src/HardwareVerification/FullAdder.agda)
+4. [Ripple Carry Adder](src/HardwareVerification/RippleCarryAdder.agda)
 
 #### 8. Miscellaneous proofs
 1. `fib-3n-is-even` in [EvenOdd](src/Naturals/Properties/EvenOdd.agda)
