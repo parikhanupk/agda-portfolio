@@ -22,8 +22,9 @@ agda_lib.c_free_string.restype = None
 def call_agda_process(lib, command):
     raw_ptr_address = lib.c_process(command)
     if raw_ptr_address:
-        return ctypes.string_at(raw_ptr_address).decode('utf-8')
+        ret = ctypes.string_at(raw_ptr_address).decode('utf-8')
         lib.c_free_string(raw_ptr_address)
+        return ret
     else:
         return "Received a null pointer."
 
