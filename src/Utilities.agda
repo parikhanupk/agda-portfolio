@@ -8,7 +8,7 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _<ᵇ_; _≤_; z≤n; s≤s; _∸_; _≥_)
-open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm; <⇒<ᵇ)
+open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm; +-identityʳ)
 
 
 
@@ -148,3 +148,21 @@ saⁿ≥1 a (suc n) = ab≥1 (suc a) (suc a ^ n) (s≤s z≤n) (saⁿ≥1 a n)
 a≤aˢⁿ : ∀ (a n : ℕ) → a ≤ a ^ (suc n)
 a≤aˢⁿ zero n = z≤n
 a≤aˢⁿ (suc a) n = a≤a*b (suc a) (suc a ^ n) (saⁿ≥1 a n)
+
+
+
+a≥b→c+a≥c+b : ∀ (a b c : ℕ) → a ≥ b → c + a ≥ c + b
+a≥b→c+a≥c+b a b zero a≥b = a≥b
+a≥b→c+a≥c+b a b (suc c) a≥b = s≤s (a≥b→c+a≥c+b a b c a≥b)
+
+a≥b→ac≥bc : ∀ (a b c : ℕ) → a ≥ b → a * c ≥ b * c
+a≥b→ac≥bc a zero c _ = z≤n
+a≥b→ac≥bc (suc a) (suc b) c (s≤s a≥b) = a≥b→c+a≥c+b (a * c) (b * c) c (a≥b→ac≥bc a b c a≥b)
+
+a≥b→ca≥cb : ∀ (a b c : ℕ) → a ≥ b → c * a ≥ c * b
+a≥b→ca≥cb a b c a≥b rewrite *-comm c a | *-comm c b = a≥b→ac≥bc a b c a≥b
+
+
+
+2a≡a+a : ∀ (a : ℕ) → 2 * a ≡ a + a
+2a≡a+a a rewrite +-identityʳ a = refl

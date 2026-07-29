@@ -2,12 +2,13 @@ module Polynomials.Binomials where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _*_; _+_)
+open import Data.Nat using (ℕ; zero; suc; _*_; _+_; _≤_; z≤n; s≤s; _≥_; _∸_)
 open import Data.Nat.Properties using (+-identityʳ; +-assoc; +-comm)
 open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-assoc; *-identityˡ; *-identityʳ)
+open import Data.Nat.Properties using (m+n∸m≡n; ∸-+-assoc; +-∸-comm; *-distribˡ-∸)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; cong₂)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-open import Utilities using (_²; _³; a²≡a*a)
+open import Utilities using (_²; _³; a²≡a*a; a≤a; a≤b→a≤b+c)
 
 
 
@@ -45,6 +46,106 @@ open import Utilities using (_²; _³; a²≡a*a)
                        | *-comm n (suc n)
                        | sym (+-assoc n n (n * n))
                        = refl
+
+
+
+sa*sb≡1+a+b+ab : ∀ (a b : ℕ) → suc a * suc b ≡ 1 + a + b + (a * b)
+sa*sb≡1+a+b+ab a b rewrite *-comm a (suc b)
+                         | sym (+-assoc b a (b * a))
+                         | +-comm b a
+                         | *-comm b a
+                         = refl
+
+a[b+c+d+e]≡ab+ac+ad+ae : ∀ (a b c d e : ℕ) → a * (b + c + d + e) ≡ (a * b) + (a * c) + (a * d) + (a * e)
+a[b+c+d+e]≡ab+ac+ad+ae a b c d e rewrite *-distribˡ-+ a (b + c + d) e
+                                       | *-distribˡ-+ a (b + c) d
+                                       | *-distribˡ-+ a b c
+                                       = refl
+
+lemma-2a≤2a+a² : ∀ (a : ℕ) → (2 * a) ≤ (a + a + (a * a))
+lemma-2a≤2a+a² a rewrite +-identityʳ a = a≤b→a≤b+c (a + a) (a + a) (a * a) (a≤a (a + a))
+
+lemma-2a+a²-2a≡a² : ∀ a → (a + a + (a * a)) ∸ (2 * a) ≡ a * a
+lemma-2a+a²-2a≡a² a =
+  begin
+    (a + a + (a * a)) ∸ (2 * a)
+  ≡⟨ cong (λ x → (x + (a * a)) ∸ (2 * a)) (cong (a +_) (sym (+-identityʳ a))) ⟩
+    ((2 * a) + (a * a)) ∸ (2 * a)
+  ≡⟨ m+n∸m≡n (2 * a) (a * a) ⟩
+    a * a
+  ∎
+
+[a∸b]²≡a²+b²∸2ab : ∀ (a b : ℕ) → a ≥ b → (a ∸ b) * (a ∸ b) ≡ (a * a) + (b * b) ∸ (2 * (a * b))
+[a∸b]²≡a²+b²∸2ab a zero _ rewrite *-comm a 0 | +-identityʳ (a * a) = refl
+[a∸b]²≡a²+b²∸2ab (suc a) (suc b) (s≤s a≥b) =
+  begin
+    (suc a ∸ suc b) * (suc a ∸ suc b)
+  ≡⟨ refl ⟩
+    (a ∸ b) * (a ∸ b)
+  ≡⟨ [a∸b]²≡a²+b²∸2ab a b a≥b ⟩
+    (a * a) + (b * b) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → x ∸ (2 * (a * b))) (+-comm (a * a) (b * b)) ⟩
+    (b * b) + (a * a) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (x + (a * a)) ∸ (2 * (a * b))) (sym (lemma-2a+a²-2a≡a² b)) ⟩
+    (((b + b + (b * b)) ∸ (2 * b)) + (a * a)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → x ∸ (2 * (a * b))) (sym (+-∸-comm (a * a) (lemma-2a≤2a+a² b))) ⟩
+    (((b + b + (b * b)) + (a * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (x ∸ (2 * b)) ∸ (2 * (a * b))) (+-comm (b + b + (b * b)) (a * a)) ⟩
+    (((a * a) + (b + b + (b * b))) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → ((x + (b + b + (b * b))) ∸ (2 * b)) ∸ (2 * (a * b))) (sym (lemma-2a+a²-2a≡a² a)) ⟩
+    ((((a + a + (a * a)) ∸ (2 * a)) + (b + b + (b * b))) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (x ∸ (2 * b)) ∸ (2 * (a * b))) (sym (+-∸-comm (b + b + (b * b)) (lemma-2a≤2a+a² a))) ⟩
+    ((((a + a + (a * a)) + (b + b + (b * b))) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ refl ⟩
+    (((((1 + a + a + (a * a)) ∸ 1) + ((1 + b + b + (b * b)) ∸ 1)) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong₂ (λ x y → ((((x ∸ 1) + (y ∸ 1)) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b)))
+           (sym (sa*sb≡1+a+b+ab a a))
+           (sym (sa*sb≡1+a+b+ab b b)) ⟩
+    (((((suc a * suc a) ∸ 1) + ((suc b * suc b) ∸ 1)) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → ((x ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))) (+-comm ((suc a * suc a) ∸ 1) ((suc b * suc b) ∸ 1)) ⟩
+    (((((suc b * suc b) ∸ 1) + ((suc a * suc a) ∸ 1)) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ refl ⟩
+    (((((suc b * suc b) + ((suc a * suc a) ∸ 1)) ∸ 1) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (((x ∸ 1) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))) (+-comm (suc b * suc b) ((suc a * suc a) ∸ 1)) ⟩
+    ((((((suc a * suc a) ∸ 1) + (suc b * suc b)) ∸ 1) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (((x ∸ 1) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))) (+-∸-comm {suc a * suc a} (suc b * suc b) {1} (s≤s z≤n)) ⟩
+    ((((((suc a * suc a) + (suc b * suc b)) ∸ 1) ∸ 1) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (((x ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b)))) (∸-+-assoc ((suc a * suc a) + (suc b * suc b)) 1 1) ⟩
+    (((((suc a * suc a) + (suc b * suc b)) ∸ (1 + 1)) ∸ (2 * a)) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → (x ∸ (2 * b)) ∸ (2 * (a * b))) (∸-+-assoc ((suc a * suc a) + (suc b * suc b)) 2 (2 * a)) ⟩
+    ((((suc a * suc a) + (suc b * suc b)) ∸ (2 + (2 * a))) ∸ (2 * b)) ∸ (2 * (a * b))
+  ≡⟨ cong (λ x → x ∸ (2 * (a * b))) (∸-+-assoc ((suc a * suc a) + (suc b * suc b)) (2 + (2 * a)) (2 * b)) ⟩
+    (((suc a * suc a) + (suc b * suc b)) ∸ (2 + (2 * a) + (2 * b))) ∸ (2 * (a * b))
+  ≡⟨ ∸-+-assoc ((suc a * suc a) + (suc b * suc b)) (2 + (2 * a) + (2 * b)) (2 * (a * b)) ⟩
+    ((suc a * suc a) + (suc b * suc b)) ∸ ((2 + (2 * a) + (2 * b)) + (2 * (a * b)))
+  ≡⟨ cong (λ x → (suc a * suc a) + (suc b * suc b) ∸ x) (sym (a[b+c+d+e]≡ab+ac+ad+ae 2 1 a b (a * b))) ⟩
+    (suc a * suc a) + (suc b * suc b) ∸ (2 * (1 + a + b + (a * b)))
+  ≡⟨ cong (λ x → (suc a * suc a) + (suc b * suc b) ∸ (2 * x)) (sym (sa*sb≡1+a+b+ab a b)) ⟩
+    (suc a * suc a) + (suc b * suc b) ∸ (2 * (suc a * suc b))
+  ∎
+
+
+
+[a+b]∸[b+c]≡a∸c : ∀ (a b c : ℕ) → (a + b) ∸ (b + c) ≡ a ∸ c
+[a+b]∸[b+c]≡a∸c a zero c rewrite +-identityʳ a = refl
+[a+b]∸[b+c]≡a∸c a (suc b) c rewrite +-comm a (suc b)
+                                  | +-comm b a
+                                  = [a+b]∸[b+c]≡a∸c a b c
+
+[a+b][a∸b]≡a²∸b² : ∀ (a b : ℕ) → a ≥ b → (a + b) * (a ∸ b) ≡ (a * a) ∸ (b * b)
+[a+b][a∸b]≡a²∸b² a zero _ rewrite +-identityʳ a = refl
+[a+b][a∸b]≡a²∸b² (suc a) (suc b) (s≤s a≥b) =
+  begin
+    (suc a + suc b) * (suc a ∸ suc b)
+  ≡⟨ *-distribˡ-∸ (suc a + suc b) (suc a) (suc b) ⟩
+    ((suc a + suc b) * suc a) ∸ ((suc a + suc b) * suc b)
+  ≡⟨ cong₂ (λ x y → x ∸ y) (*-distribʳ-+ (suc a) (suc a) (suc b)) (*-distribʳ-+ (suc b) (suc a) (suc b)) ⟩
+    ((suc a * suc a) + (suc b * suc a)) ∸ ((suc a * suc b) + (suc b * suc b))
+  ≡⟨ cong (λ x → ((suc a * suc a) + x) ∸ ((suc a * suc b) + (suc b * suc b))) (*-comm (suc b) (suc a)) ⟩
+    ((suc a * suc a) + (suc a * suc b)) ∸ ((suc a * suc b) + (suc b * suc b))
+  ≡⟨ [a+b]∸[b+c]≡a∸c (suc a * suc a) (suc a * suc b) (suc b * suc b) ⟩
+    (suc a * suc a) ∸ (suc b * suc b)
+  ∎
 
 
 

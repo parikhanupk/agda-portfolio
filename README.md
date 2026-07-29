@@ -49,12 +49,16 @@ Work in progress, but did various proofs around the following:
 6. `if d divides a and b, then d divides ma + nb` in [Divisibility](src/Naturals/Properties/Divisibility.agda)
 7. `6 divides product of any 3 consecutive naturals` in [Puzzles](src/Puzzles/Consecutive-product-of-3-div-by-6.agda)
 8. `n≥4→2ⁿ<n!` in [Factorial](src/Naturals/Properties/Factorial.agda)
+9. `[a∸b]²≡a²+b²∸2ab and [a+b][a∸b]≡a²∸b²` in [Binomials](src/Polynomials/Binomials.agda)
 
 #### 9. [src/Series/Properties/Factorial.agda](src/Series/Properties/Factorial.agda)
 Proof that `∀ (m n : ℕ) → (m>0 : m > 0) → m ≤ n → Div m m>0 (n !)`
 
 #### 10. [src/Divisibility/EuclideanRelation.agda](src/Divisibility/EuclideanRelation.agda)
 Proof that `(a = bq + r) , (r < b) → (ak = bkq + rk) , (rk < bk)`
+
+#### 11. [src/Puzzles/MO-Romania-1959-triangle.agda](src/Puzzles/MO-Romania-1959-triangle.agda)
+Some proofs around derivation of conditions of the IMO problem and proof that such a triangle is impossible with integer lengths
 
 And, a demo that calls Agda verified function(s) from Python. Please note that this demo is primarily a learning tool and I don't yet understand a lot of what makes Agda to Haskell to C to Python FFI work. Currently, this demo only calls the verified Ripple Carry Adder.
 

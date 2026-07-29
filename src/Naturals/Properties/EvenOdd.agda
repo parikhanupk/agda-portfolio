@@ -3,11 +3,14 @@ module Naturals.Properties.EvenOdd where
 
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _≥_; _≤_; z≤n; s≤s; _*_; _^_; _>_)
-open import Data.Nat.Properties using (+-comm; *-comm; +-identityʳ; +-assoc; *-identityˡ)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst)
-open import Data.Product using (∃-syntax; _×_; _,_)
+open import Data.Nat.Properties using (+-comm; *-comm; +-identityʳ; +-assoc; *-assoc)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; subst; _≢_; cong₂)
+open Relation.Binary.PropositionalEquality.≡-Reasoning
+open import Data.Product using (∃-syntax; _×_; _,_; proj₁; proj₂)
 open import Naturals.Fibonacci using (fib)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Empty using (⊥)
+open import Utilities using (*-swap)
 
 
 
@@ -58,6 +61,51 @@ odd+odd≡even {.(suc a')} {.(suc b')} (os {a'} even-a') (os {b'} even-b')
 *-odd-odd : ∀ {a b : ℕ} → Odd a → Odd b → Odd (a * b)
 *-odd-odd {suc zero} {b} _ odd-b rewrite +-identityʳ b = odd-b
 *-odd-odd {suc (suc a)} {b} (os (es odd-a)) odd-b = odd+even≡odd odd-b (odd+odd≡even odd-b (*-odd-odd odd-a odd-b))
+
+
+
+even≢odd′ : ∀ (a b : ℕ) → Even a → Odd b → a ≢ b
+even≢odd′ zero zero eo () a≡b
+even≢odd′ zero (suc b) eo (os _) ()
+even≢odd′ (suc a) zero (es _) () a≡b
+even≢odd′ (suc a) (.(suc a)) (es odd-a) (os even-a) refl = even≢odd′ a a even-a odd-a refl
+
+even-and-odd : ∀ {a : ℕ} → Even a → Odd a → ⊥
+even-and-odd eo ()
+even-and-odd (es x) (os x₁) = even-and-odd x₁ x
+
+even≢odd : ∀ {a b : ℕ} → Even a → Odd b → a ≢ b
+even≢odd eo (os x) ()
+even≢odd (es odd-n) (os even-n) refl = even-and-odd even-n odd-n
+
+
+
+add-suc-suc : ∀ (a k : ℕ) → (a ≡ 2 * k) → suc (suc a) ≡ 2 * (suc k)
+add-suc-suc a k a≡2k rewrite +-identityʳ k | +-comm k (suc k) = cong suc (cong suc a≡2k)
+
+even-a→a≡2k : ∀ (a : ℕ) → Even a → ∃[ k ](a ≡ 2 * k)
+even-a→a≡2k zero eo = zero , refl
+even-a→a≡2k (suc zero) (es ())
+even-a→a≡2k (suc (suc a)) (es (os even-a)) with even-a→a≡2k a even-a
+... | k , a≡2k = (suc k) , add-suc-suc a k a≡2k
+
+a≡2k→a²≡4k² : ∀ (a k : ℕ) → (a ≡ 2 * k) → (a * a) ≡ 4 * (k * k)
+a≡2k→a²≡4k² a k a≡2k =
+  begin
+    a * a
+  ≡⟨ cong₂ (λ x y → x * y) a≡2k a≡2k ⟩
+    (2 * k) * (2 * k)
+  ≡⟨ *-swap 2 k (2 * k) ⟩
+    2 * (2 * k) * k
+  ≡⟨ cong (_* k) (sym (*-assoc 2 2 k)) ⟩
+    (2 * 2 * k) * k
+  ≡⟨ *-assoc 4 k k ⟩
+    4 * (k * k)
+  ∎
+
+even-a→a²≡4k² : ∀ (a : ℕ) → Even a → ∃[ k ]((a ≡ 2 * k) × (a * a ≡ 4 * (k * k)))
+even-a→a²≡4k² a even-a with even-a→a≡2k a even-a
+... | k , a≡2k = k , (a≡2k , a≡2k→a²≡4k² a k a≡2k)
 
 
 
