@@ -50,6 +50,8 @@ Work in progress, but did various proofs around the following:
 7. `6 divides product of any 3 consecutive naturals` in [Puzzles](src/Puzzles/Consecutive-product-of-3-div-by-6.agda)
 8. `n≥4→2ⁿ<n!` in [Factorial](src/Naturals/Properties/Factorial.agda)
 9. `[a∸b]²≡a²+b²∸2ab and [a+b][a∸b]≡a²∸b²` in [Binomials](src/Polynomials/Binomials.agda)
+10. a weak version of `n & (n + 1) == 0 -> Pow2 (n + 1)` in [ComputationalTricks](src/ComputationalTricks/Power2.agda)
+11. `n≡2n→n≡0′ : ∀ (n : ℕ) → n ≡ 2 * n → n ≡ 0` in [Puzzles](src/Puzzles/n-eq-2n-implies-n-eq-0.agda)
 
 #### 9. [src/Series/Properties/Factorial.agda](src/Series/Properties/Factorial.agda)
 Proof that `∀ (m n : ℕ) → (m>0 : m > 0) → m ≤ n → Div m m>0 (n !)`
