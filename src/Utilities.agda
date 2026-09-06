@@ -166,3 +166,9 @@ a≥b→ca≥cb a b c a≥b rewrite *-comm c a | *-comm c b = a≥b→ac≥bc a 
 
 2a≡a+a : ∀ (a : ℕ) → 2 * a ≡ a + a
 2a≡a+a a rewrite +-identityʳ a = refl
+
+
+
+sa∸sa≡0 : ∀ (a : ℕ) → suc a ∸ suc a ≡ 0
+sa∸sa≡0 zero = refl
+sa∸sa≡0 (suc a) = sa∸sa≡0 a
