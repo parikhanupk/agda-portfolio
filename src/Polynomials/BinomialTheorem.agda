@@ -26,15 +26,18 @@ open import Utilities using (sa∸sa≡0)
   How it works:
     suppose one wants to compute number of ways one could build a team of k players out of n people
     that is - 'pick n k'
-    for any person p, one could pick p or not pick p
-    suppose p is picked: now one needs to pick k-1 out of n-1, so recursively 'pick n-1 k-1'
-    suppose p is not picked: now one still needs to pick k but out of n-1, so recursively 'pick n-1 k'
-    because p must either be on the team or off the team, simply add those to get total ways
-    that is → ⁿCₖ = ⁿ⁻¹Cₖ₋₁ + ⁿ⁻¹Cₖ
+    - if k = 0, there's only one way to build an empty team (by doing nothing)
+    - if n = 0 but k > 0, there are no ways to build a team, none
+    - if n > 0 and k > 0:
+      for any person p, one could pick p or not pick p
+      suppose p is picked: now one needs to pick k-1 out of n-1, so recursively 'pick n-1 k-1'
+      suppose p is not picked: now one still needs to pick k but out of n-1, so recursively 'pick n-1 k'
+      because p must either be on the team or off the team, simply add those to get total ways
+      that is → ⁿCₖ = ⁿ⁻¹Cₖ₋₁ + ⁿ⁻¹Cₖ
 -}
 pick : ℕ → ℕ → ℕ
-pick zero _ = 1
-pick (suc n) zero = 1
+pick _ zero = 1
+pick zero (suc _) = 0
 pick (suc n) (suc k) = (pick n k) + (pick n (suc k))
 
 
@@ -81,16 +84,50 @@ list-distrib a b (x ∷ xs) =
 {-
 sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
 ≡ sum (map (λ k → a * (binomial-term a b n k)) (naturalsᵣ n))
-≡ ⁿCₙ * a^1 * b^n +
-  ⁿCₙ₋₁ * a^2 * b^n-1 +
-  ... +
-  ⁿC₀ * a^sn * b^0
+≡ (ⁿCₙ * a¹ * bⁿ) + (ⁿCₙ₋₁ * a² * bⁿ⁻¹) + ... + (ⁿC₀ * aⁿ⁺¹ * b⁰)
+
+sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
+≡ sum (map (λ k → b * (binomial-term a b n k)) (naturalsᵣ n))
+≡ (ⁿCₙ * a⁰ * bⁿ⁺¹) + (ⁿCₙ₋₁ * a¹ * bⁿ) + ... + (ⁿC₀ * aⁿ * b¹)
+
+sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n))) +
+sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
+≡ (ⁿCₙ * a¹ * bⁿ) + (ⁿCₙ₋₁ * a² * bⁿ⁻¹) + ... + (ⁿC₀ * aⁿ⁺¹ * b⁰) +
+  (ⁿCₙ * a⁰ * bⁿ⁺¹) + (ⁿCₙ₋₁ * a¹ * bⁿ) + ... + (ⁿC₀ * aⁿ * b¹)
+≡ ((ⁿCₙ + ⁿCₙ₋₁) * a¹ * bⁿ) + ((ⁿCₙ₋₁ + ⁿCₙ₋₂) * a² * bⁿ⁻¹) + ... + ((ⁿC₁ + ⁿC₀) * aⁿ * b¹) +
+  (ⁿC₀ * aⁿ⁺¹ * b⁰) + (ⁿCₙ * a⁰ * bⁿ⁺¹)
+≡ ((ⁿCₙ + ⁿCₙ₋₁) * a¹ * bⁿ) + ((ⁿCₙ₋₁ + ⁿCₙ₋₂) * a² * bⁿ⁻¹) + ... + ((ⁿC₁ + ⁿC₀) * aⁿ * b¹) +
+  aⁿ⁺¹ + bⁿ⁺¹
+
+(pick (suc n) (suc n)) * a⁰ * bⁿ⁺¹
+≡ (ⁿCₙ + ⁿCₙ₊₁) * a⁰ * bⁿ⁺¹
 
 sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
-≡ ˢⁿCₙ * a^1 * b^n +
-  ˢⁿCₙ₋₁ * a^2 * b^n-1 +
-  ... +
-  ˢⁿC₀ * a^sn * b^0
+≡ (ⁿ⁺¹Cₙ * a¹ * bⁿ) + (ⁿ⁺¹Cₙ₋₁ * a² * bⁿ⁻¹) + ... + (ⁿ⁺¹C₀ * aⁿ⁺¹ * b⁰)
+
+((pick (suc n) (suc n)) * a⁰ * bⁿ⁺¹) +
+sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
+≡ (ⁿCₙ + ⁿCₙ₊₁) * a⁰ * bⁿ⁺¹ +
+  (ⁿ⁺¹Cₙ * a¹ * bⁿ) + (ⁿ⁺¹Cₙ₋₁ * a² * bⁿ⁻¹) + ... + (ⁿ⁺¹C₀ * aⁿ⁺¹ * b⁰)
+
+ⁿ⁺¹Cₙ = ⁿCₙ + ⁿCₙ₋₁
+ⁿ⁺¹Cₙ₋₁ = ⁿCₙ₋₁ + ⁿCₙ₋₂
+...
+ⁿ⁺¹C₁ = ⁿC₁ + ⁿC₀
+ⁿ⁺¹C₀ = 1
+
+so, (ⁿCₙ + ⁿCₙ₊₁) * a⁰ * bⁿ⁺¹ +
+    (ⁿ⁺¹Cₙ * a¹ * bⁿ) + (ⁿ⁺¹Cₙ₋₁ * a² * bⁿ⁻¹) + ... + (ⁿ⁺¹C₀ * aⁿ⁺¹ * b⁰)
+≡   bⁿ⁺¹ + 
+    ((ⁿCₙ + ⁿCₙ₋₁) * a¹ * bⁿ) + ((ⁿCₙ₋₁ + ⁿCₙ₋₂) * a² * bⁿ⁻¹) + ... + ((ⁿC₁ + ⁿC₀) * aⁿ * b¹) +
+    aⁿ⁺¹
+
+so,
+((pick (suc n) (suc n)) * a⁰ * bⁿ⁺¹) +
+sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
+≡
+sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n))) +
+sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
 -}
 
 
