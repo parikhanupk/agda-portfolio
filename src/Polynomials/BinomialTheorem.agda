@@ -2,8 +2,9 @@ module Polynomials.BinomialTheorem where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _∸_)
-open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityˡ)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _∸_; _<_; _≤_; z≤n; s≤s)
+open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityˡ; +-identityʳ; *-identityʳ; +-assoc)
+open import Data.Nat.Properties using (m<n⇒m<1+n; n<1+n; n∸n≡0)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; cong₂)
 open import Data.Nat.ListAction using (sum)
 open import Data.List using (List; []; _∷_; map)
@@ -11,6 +12,7 @@ open import Data.List.Properties using (foldr-map)
 open import Series.Naturals using (naturalsᵣ)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Utilities using (sa∸sa≡0)
+open import Data.Nat.Tactic.RingSolver using (solve)
 
 
 
@@ -42,8 +44,111 @@ pick (suc n) (suc k) = (pick n k) + (pick n (suc k))
 
 
 
+pick-n-< : ∀ (n k : ℕ) → n < k → pick n k ≡ 0
+pick-n-< zero (suc k) _ = refl
+pick-n-< (suc n) (suc k) (s≤s n<k) =
+  begin
+    pick (suc n) (suc k)
+  ≡⟨ refl ⟩
+    pick n k + pick n (suc k)
+  ≡⟨ cong (_+ pick n (suc k)) (pick-n-< n k n<k) ⟩
+    0 + pick n (suc k)
+  ≡⟨ refl ⟩
+    pick n (suc k)
+  ≡⟨ pick-n-< n (suc k) (m<n⇒m<1+n n<k) ⟩
+    0
+  ∎
+
+
+
+pick-n-n : ∀ (n : ℕ) → pick n n ≡ 1
+pick-n-n zero = refl
+pick-n-n (suc n) =
+  begin
+    pick (suc n) (suc n)
+  ≡⟨ refl ⟩
+    (pick n n) + (pick n (suc n))
+  ≡⟨ cong (_+ pick n (suc n)) (pick-n-n n) ⟩
+    1 + (pick n (suc n))
+  ≡⟨ cong (1 +_) (pick-n-< n (suc n) (n<1+n n)) ⟩
+    1 + 0
+  ≡⟨ refl ⟩
+    1
+  ∎
+
+
+
 binomial-term : ℕ → ℕ → ℕ → ℕ → ℕ
 binomial-term a b n k = (pick n k) * ((a ^ (n ∸ k)) * (b ^ k))
+
+
+
+a*[b*[c*d]]≡b*[a*c*d] : ∀ (a b c d : ℕ) → (a * (b * (c * d))) ≡ b * (a * c * d)
+a*[b*[c*d]]≡b*[a*c*d] a b c d = solve (a ∷ b ∷ c ∷ d ∷ [])
+
+a*[b*[c*d]]≡b*[c*[a*d]] : ∀ (a b c d : ℕ) → (a * (b * (c * d))) ≡ b * (c * (a * d))
+a*[b*[c*d]]≡b*[c*[a*d]] a b c d = solve (a ∷ b ∷ c ∷ d ∷ [])
+
+
+
+{-
+lemma-binomial-merge : ∀ (a b n k : ℕ)
+                     → a * binomial-term a b (suc n) (suc k) +
+                       b * binomial-term a b (suc n) k
+                     ≡ binomial-term a b (suc (suc n)) (suc k)
+lemma-binomial-merge a b n k =
+  begin
+    a * binomial-term a b (suc n) (suc k) +
+    b * binomial-term a b (suc n) k
+  ≡⟨ refl ⟩
+    a * ((pick (suc n) (suc k)) * ((a ^ (suc n ∸ suc k)) * (b ^ suc k))) +
+    b * ((pick (suc n) k) * ((a ^ (suc n ∸ k)) * (b ^ k)))
+  ≡⟨ cong₂ (λ x y → x + y)
+           (a*[b*[c*d]]≡b*[a*c*d] a (pick (suc n) (suc k)) (a ^ (suc n ∸ suc k)) (b ^ suc k))
+           (a*[b*[c*d]]≡b*[c*[a*d]] b (pick (suc n) k) (a ^ (suc n ∸ k)) (b ^ k)) ⟩
+    (pick (suc n) (suc k)) * (a * (a ^ (suc n ∸ suc k)) * (b ^ suc k)) +
+    (pick (suc n) k) * ((a ^ (suc n ∸ k)) * (b * (b ^ k)))
+  ≡⟨ refl ⟩
+    (pick (suc n) (suc k)) * ((a ^ suc (n ∸ k)) * (b ^ suc k)) +
+    (pick (suc n) k) * ((a ^ (suc n ∸ k)) * (b ^ suc k))
+  ≡⟨ {!!} ⟩
+    binomial-term a b (suc (suc n)) (suc k)
+  ∎
+-}
+
+
+
+binomial-term-n-0 : ∀ (a b n : ℕ) → binomial-term a b n 0 ≡ a ^ n
+binomial-term-n-0 a b n =
+  begin
+    binomial-term a b n 0
+  ≡⟨ refl ⟩
+    (pick n 0) * ((a ^ (n ∸ 0)) * (b ^ 0))
+  ≡⟨ refl ⟩
+    1 * ((a ^ n) * 1)
+  ≡⟨ *-identityˡ (a ^ n * 1) ⟩
+    ((a ^ n) * 1)
+  ≡⟨ *-identityʳ (a ^ n) ⟩
+    a ^ n
+  ∎
+
+
+
+binomial-term-n-n : ∀ (a b n : ℕ) → binomial-term a b n n ≡ b ^ n
+binomial-term-n-n a b n =
+  begin
+    binomial-term a b n n
+  ≡⟨ refl ⟩
+    (pick n n) * ((a ^ (n ∸ n)) * (b ^ n))
+  ≡⟨ cong₂ (λ x y → x * (a ^ y * (b ^ n))) (pick-n-n n) (n∸n≡0 n) ⟩
+    1 * ((a ^ 0) * (b ^ n))
+  ≡⟨ refl ⟩
+    1 * (1 * (b ^ n))
+  ≡⟨ *-identityˡ (1 * (b ^ n)) ⟩
+    (1 * (b ^ n))
+  ≡⟨ *-identityˡ (b ^ n) ⟩
+    b ^ n
+  ∎
 
 
 
@@ -80,7 +185,11 @@ list-distrib a b (x ∷ xs) =
 
 
 
---lemma-map-merge : ∀ (a : ℕ) (xs : List ℕ) → map (a *_)
+lemma-[a+b]+[c+d]≡[a+c]+[b+d] : ∀ (a b c d : ℕ) → (a + b) + (c + d) ≡ (a + c) + (b + d)
+lemma-[a+b]+[c+d]≡[a+c]+[b+d] a b c d = solve (a ∷ b ∷ c ∷ d ∷ [])
+
+
+
 {-
 sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
 ≡ sum (map (λ k → a * (binomial-term a b n k)) (naturalsᵣ n))
@@ -129,10 +238,105 @@ sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
 sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n))) +
 sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
 -}
-
-
-
 {-
+lemma-merge : ∀ (a b n : ℕ)
+            → sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n))) +
+              sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
+            ≡ ((pick (suc n) (suc n)) * (b ^ suc n)) +
+              sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
+lemma-merge a b zero =
+  begin
+    sum (map (a *_) (map (λ k → binomial-term a b zero k) (naturalsᵣ zero))) +
+    sum (map (b *_) (map (λ k → binomial-term a b zero k) (naturalsᵣ zero)))
+  ≡⟨ cong₂ (λ x y → x + y) (helper a a b) (helper b a b) ⟩
+    a + b
+  ≡⟨ solve (a ∷ b ∷ []) ⟩
+    ((1 + 0) * (b * 1)) + ((1 * ((a * 1) * 1)) + 0)
+  ≡⟨ refl ⟩
+    (((pick 0 0) + (pick 0 1)) * (b * 1)) + ((1 * ((a * 1) * 1)) + 0)
+  ≡⟨ refl ⟩
+    ((pick 1 1) * (b * 1)) + ((1 * ((a * 1) * 1)) + 0)
+  ≡⟨ refl ⟩
+    ((pick 1 1) * (b * 1)) + sum ((1 * ((a * 1) * 1)) ∷ [])
+  ≡⟨ refl ⟩
+    ((pick 1 1) * (b * 1)) + sum (((pick 1 0) * ((a ^ 1) * (b ^ 0))) ∷ map (λ k → binomial-term a b 1 k) [])
+  ≡⟨ refl ⟩
+    ((pick 1 1) * (b * 1)) + sum (map (λ k → binomial-term a b 1 k) (0 ∷ []))
+  ≡⟨ refl ⟩
+    ((pick (suc zero) (suc zero)) * (b ^ suc zero)) +
+    sum (map (λ k → binomial-term a b (suc zero) k) (naturalsᵣ zero))
+  ∎
+  where
+  helper : ∀ (c d e : ℕ) → sum (map (c *_) (map (λ k → binomial-term d e zero k) (naturalsᵣ zero))) ≡ c
+  helper c d e =
+    begin sum (map (c *_) (map (λ k → binomial-term d e zero k) (naturalsᵣ zero)))
+    ≡⟨ refl ⟩ sum (map (c *_) (map (λ k → binomial-term d e zero k) (0 ∷ [])))
+    ≡⟨ refl ⟩ sum (map (c *_) ((binomial-term d e zero 0) ∷ map (λ k → binomial-term d e zero k) []))
+    ≡⟨ refl ⟩ sum (map (c *_) ((binomial-term d e zero 0) ∷ []))
+    ≡⟨ refl ⟩ sum (map (c *_) (((pick 0 0) * (d ^ 0 * e ^ 0)) ∷ []))
+    ≡⟨ refl ⟩ sum (map (c *_) ((1 * (1 * 1)) ∷ []))
+    ≡⟨ refl ⟩ sum (map (c *_) (1 ∷ []))
+    ≡⟨ refl ⟩ sum ((c * 1) ∷ map (c *_) [])
+    ≡⟨ refl ⟩ sum ((c * 1) ∷ [])
+    ≡⟨ refl ⟩ ((c * 1) + 0)
+    ≡⟨ +-identityʳ (c * 1) ⟩ (c * 1)
+    ≡⟨ *-identityʳ c ⟩ c
+    ∎
+lemma-merge a b (suc n) =
+  begin
+    sum (map (a *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ (suc n)))) +
+    sum (map (b *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ (suc n))))
+  ≡⟨ refl ⟩
+    sum (map (a *_) (binomial-term a b (suc n) (suc n) ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))) +
+    sum (map (b *_) (binomial-term a b (suc n) (suc n) ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))
+  ≡⟨ cong₂ (λ x y → sum (map (a *_) (x ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))) +
+                    sum (map (b *_) (y ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))))
+           (binomial-term-n-n a b (suc n))
+           (binomial-term-n-n a b (suc n)) ⟩
+    sum (map (a *_) (b ^ (suc n) ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))) +
+    sum (map (b *_) (b ^ (suc n) ∷ map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))
+  ≡⟨ refl ⟩
+    sum (a * (b ^ (suc n)) ∷ (map (a *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))) +
+    sum (b * (b ^ (suc n)) ∷ (map (b *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))))
+  ≡⟨ refl ⟩
+    ((a * (b ^ (suc n))) + sum (map (a *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))) +
+    ((b * (b ^ (suc n))) + sum (map (b *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))))
+  ≡⟨ lemma-[a+b]+[c+d]≡[a+c]+[b+d] (a * (b ^ (suc n)))
+                                   (sum (map (a *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))))
+                                   (b * (b ^ (suc n)))
+                                   (sum (map (b *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))) ⟩
+    ((a * (b ^ (suc n))) + (b * (b ^ (suc n)))) +
+    (sum (map (a *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))) +
+    sum (map (b *_) (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))))
+  ≡⟨ {!!} ⟩
+    (b ^ suc (suc n)) + (binomial-term a b (suc (suc n)) (suc n)) +
+    sum (map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ n))
+  ≡⟨ +-assoc (b ^ suc (suc n))
+             (binomial-term a b (suc (suc n)) (suc n))
+             (sum (map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ n))) ⟩
+    (b ^ suc (suc n)) + ((binomial-term a b (suc (suc n)) (suc n)) +
+    sum (map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ n)))
+  ≡⟨ refl ⟩
+    (b ^ suc (suc n)) +
+    sum (binomial-term a b (suc (suc n)) (suc n) ∷ map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ n))
+  ≡⟨ refl ⟩
+    (b ^ suc (suc n)) +
+    sum (binomial-term a b (suc (suc n)) (suc n) ∷ map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ n))
+  ≡⟨ refl ⟩
+    (b ^ suc (suc n)) +
+    sum (map (λ k → binomial-term a b (suc (suc n)) k) ((suc n) ∷ naturalsᵣ n))
+  ≡⟨ cong (λ x → x + sum (map (λ k → binomial-term a b (suc (suc n)) k) ((suc n) ∷ naturalsᵣ n)))
+          (sym (*-identityˡ (b ^ suc (suc n)))) ⟩
+    1 * (b ^ suc (suc n)) +
+    sum (map (λ k → binomial-term a b (suc (suc n)) k) ((suc n) ∷ naturalsᵣ n))
+  ≡⟨ cong (λ x → x * (b ^ suc (suc n)) + sum (map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ (suc n))))
+          (sym (pick-n-n (suc (suc n)))) ⟩
+    (pick (suc (suc n)) (suc (suc n))) * (b ^ suc (suc n)) +
+    sum (map (λ k → binomial-term a b (suc (suc n)) k) (naturalsᵣ (suc n)))
+  ∎
+
+
+
 binomial-theorem : ∀ (a b n : ℕ)
                  → (a + b) ^ n
                  ≡ sum (map (λ k → binomial-term a b n k) (naturalsᵣ n))
@@ -147,7 +351,7 @@ binomial-theorem a b (suc n) =
   ≡⟨ list-distrib a b (map (λ k → binomial-term a b n k) (naturalsᵣ n)) ⟩
     sum (map (a *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n))) +
     sum (map (b *_) (map (λ k → binomial-term a b n k) (naturalsᵣ n)))
-  ≡⟨ {!!} ⟩
+  ≡⟨ lemma-merge a b n ⟩
     ((pick (suc n) (suc n)) * (b ^ suc n)) +
     sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n))
   ≡⟨ cong (_+ sum (map (λ k → binomial-term a b (suc n) k) (naturalsᵣ n)))
