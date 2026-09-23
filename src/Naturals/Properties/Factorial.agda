@@ -2,9 +2,20 @@ module Naturals.Properties.Factorial where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _≤_; z≤n; s≤s)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _≤_; z≤n; s≤s; _>_)
 open import Data.Nat.Properties using (+-identityʳ; +-comm)
 open import Naturals.Factorial using (_!)
+
+
+
+ab>0 : ∀ (a b : ℕ) → a > 0 → b > 0 → a * b > 0
+ab>0 (suc a) (suc b) _ _ = s≤s z≤n
+
+
+
+n!>0 : ∀ (n : ℕ) → (n !) > 0
+n!>0 zero = s≤s z≤n
+n!>0 (suc n) = ab>0 (suc n) (n !) (s≤s z≤n) (n!>0 n)
 
 
 

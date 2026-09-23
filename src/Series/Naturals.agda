@@ -39,3 +39,19 @@ _ = refl
 
 _ : sum (naturalsₐ 3) ≡ 6
 _ = refl
+
+
+
+--sequence with n number of terms starting with i
+sequence : (i n : ℕ) → List ℕ
+sequence i zero = []
+sequence i (suc n) = i ∷ (sequence (suc i) n)
+
+_ : sequence 0 0 ≡ []
+_ = refl
+
+_ : sequence 0 3 ≡ 0 ∷ 1 ∷ 2 ∷ []
+_ = refl
+
+_ : sequence 1 3 ≡ 1 ∷ 2 ∷ 3 ∷ []
+_ = refl
