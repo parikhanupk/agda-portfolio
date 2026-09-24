@@ -65,6 +65,9 @@ Some proofs around derivation of conditions of the IMO problem and proof that su
 #### 12. [src/Polynomials/BinomialTheorem.agda](src/Polynomials/BinomialTheorem.agda)
 Proof of the binomial theorem - still a work in progress (todo - proof readability and removal of a postulate)
 
+#### 13. [src/Puzzles/MO-Romania-1959-fraction.agda](src/Puzzles/MO-Romania-1959-fraction.agda)
+Proof that the fraction (21n + 4) / (14n + 3) is irreducible for every natural number n
+
 And, a demo that calls Agda verified function(s) from Python. Please note that this demo is primarily a learning tool and I don't yet understand a lot of what makes Agda to Haskell to C to Python FFI work. Currently, this demo only calls the verified Ripple Carry Adder.
 
 ## Background
