@@ -2,9 +2,9 @@ module List.Properties where
 
 
 
-open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat using (ℕ; zero; suc; _+_; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (_≟_)
-open import Data.List using (List; []; _∷_; length; _++_; map; take; drop)
+open import Data.List using (List; []; _∷_; length; _++_; map; take; drop; replicate)
 open import Data.Bool.ListAction using (any)
 open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; _≢_)
@@ -318,60 +318,183 @@ take-drop-invariant (suc n) (x ∷ xs) =
 
 
 
-encode-rle-helper : (ncur cur : ℕ) → (xs : List ℕ) → List (ℕ × ℕ)
-encode-rle-helper ncur cur [] = (ncur , cur) ∷ []
-encode-rle-helper ncur cur (x ∷ xs) with cur ≟ x
-... | yes _ = encode-rle-helper (suc ncur) cur xs
-... | no _ = (ncur , cur) ∷ encode-rle-helper 1 x xs
+module problem-15 where
 
-encode-rle : List ℕ → List (ℕ × ℕ)
-encode-rle [] = []
-encode-rle (x ∷ xs) = encode-rle-helper 1 x xs
+  encode-rle-helper : (ncur cur : ℕ) → (xs : List ℕ) → List (ℕ × ℕ)
+  encode-rle-helper ncur cur [] = (ncur , cur) ∷ []
+  encode-rle-helper ncur cur (x ∷ xs) with cur ≟ x
+  ... | yes _ = encode-rle-helper (suc ncur) cur xs
+  ... | no _ = (ncur , cur) ∷ encode-rle-helper 1 x xs
 
-decode-rle : List (ℕ × ℕ) → List ℕ
+  encode-rle : List ℕ → List (ℕ × ℕ)
+  encode-rle [] = []
+  encode-rle (x ∷ xs) = encode-rle-helper 1 x xs
+
+  decode-rle : List (ℕ × ℕ) → List ℕ
+  decode-rle [] = []
+  decode-rle ((zero , cur) ∷ xs) = decode-rle xs
+  decode-rle ((suc ncur , cur) ∷ xs) = cur ∷ decode-rle ((ncur , cur) ∷ xs)
+
+  lemma-rle : ∀ (ncur cur : ℕ) (xs : List ℕ)
+            → decode-rle (encode-rle-helper (suc ncur) cur xs)
+            ≡ cur ∷ decode-rle (encode-rle-helper ncur cur xs)
+  lemma-rle ncur cur [] = refl
+  lemma-rle ncur cur (x ∷ xs) with cur ≟ x
+  ... | yes cur≡x =
+    begin
+      decode-rle (encode-rle-helper (suc (suc ncur)) cur xs)
+    ≡⟨ lemma-rle (suc ncur) cur xs ⟩
+      cur ∷ decode-rle (encode-rle-helper (suc ncur) cur xs)
+    ∎
+  ... | no ¬cur≡x = refl
+
+  lemma-rle₂ : ∀ (cur : ℕ) (xs : List ℕ)
+             → decode-rle (encode-rle-helper 0 cur xs)
+             ≡ decode-rle (encode-rle xs)
+  lemma-rle₂ cur [] = refl
+  lemma-rle₂ cur (x ∷ xs) with cur ≟ x
+  ... | yes cur≡x =
+    begin
+      decode-rle (encode-rle-helper 1 cur xs)
+    ≡⟨ cong (λ z → decode-rle (encode-rle-helper 1 z xs)) cur≡x ⟩
+      decode-rle (encode-rle-helper 1 x xs)
+    ∎
+  ... | no ¬cur≡x = refl
+
+  --problem 15
+  rle-roundtrip : ∀ (xs : List ℕ)
+                → decode-rle (encode-rle xs) ≡ xs
+  rle-roundtrip [] = refl
+  rle-roundtrip (x ∷ xs) =
+    begin
+      decode-rle (encode-rle (x ∷ xs))
+    ≡⟨ refl ⟩
+      decode-rle (encode-rle-helper 1 x xs)
+    ≡⟨ lemma-rle 0 x xs ⟩
+      x ∷ decode-rle (encode-rle-helper 0 x xs)
+    ≡⟨ cong (x ∷_) (lemma-rle₂ x xs) ⟩
+      x ∷ decode-rle (encode-rle xs)
+    ≡⟨ cong (x ∷_) (rle-roundtrip xs) ⟩
+      x ∷ xs
+    ∎
+
+
+
+module problem-15-2 where
+
+  open problem-15 using (encode-rle-helper; encode-rle)
+
+  decode-rle : List (ℕ × ℕ) → List ℕ
+  decode-rle [] = []
+  decode-rle ((nx , x) ∷ xs) = (replicate nx x) ++ (decode-rle xs)
+
+  lemma-rle : ∀ (ncur cur : ℕ) (xs : List ℕ)
+            → decode-rle (encode-rle-helper (suc ncur) cur xs)
+            ≡ cur ∷ decode-rle (encode-rle-helper ncur cur xs)
+  lemma-rle ncur cur [] = refl
+  lemma-rle ncur cur (x ∷ xs) with cur ≟ x
+  ... | yes cur≡x =
+    begin
+      decode-rle (encode-rle-helper (suc (suc ncur)) cur xs)
+    ≡⟨ lemma-rle (suc ncur) cur xs ⟩
+      cur ∷ (decode-rle (encode-rle-helper (suc ncur) cur xs))
+    ∎
+  ... | no ¬cur≡x = refl
+
+  lemma-rle₂ : ∀ (cur : ℕ) (xs : List ℕ)
+             → decode-rle (encode-rle-helper 0 cur xs)
+             ≡ decode-rle (encode-rle xs)
+  lemma-rle₂ cur [] = refl
+  lemma-rle₂ cur (x ∷ xs) with cur ≟ x
+  ... | yes cur≡x =
+    begin
+      decode-rle (encode-rle-helper 1 cur xs)
+    ≡⟨ cong (λ z → decode-rle (encode-rle-helper 1 z xs)) cur≡x ⟩
+      decode-rle (encode-rle-helper 1 x xs)
+    ∎
+  ... | no ¬cur≡x = refl
+
+  --problem 15-2
+  rle-roundtrip : ∀ (xs : List ℕ)
+                → decode-rle (encode-rle xs) ≡ xs
+  rle-roundtrip [] = refl
+  rle-roundtrip (x ∷ xs) =
+    begin
+      decode-rle (encode-rle (x ∷ xs))
+    ≡⟨ refl ⟩
+      decode-rle (encode-rle-helper 1 x xs)
+    ≡⟨ lemma-rle 0 x xs ⟩
+      x ∷ decode-rle (encode-rle-helper 0 x xs)
+    ≡⟨ cong (x ∷_) (lemma-rle₂ x xs) ⟩
+      x ∷ decode-rle (encode-rle xs)
+    ≡⟨ cong (x ∷_) (rle-roundtrip xs) ⟩
+      x ∷ xs
+    ∎
+
+
+
+encode-rle-helper : {A : Set}
+                  → (dec-eq : (x y : A) → Dec (x ≡ y))
+                  → (ncur : ℕ)
+                  → (cur : A)
+                  → (as : List A)
+                  → List (ℕ × A)
+encode-rle-helper dec-eq ncur cur [] = (ncur , cur) ∷ []
+encode-rle-helper dec-eq ncur cur (a ∷ as) with dec-eq cur a
+... | yes _ = encode-rle-helper dec-eq (suc ncur) cur as
+... | no _ = (ncur , cur) ∷ encode-rle-helper dec-eq 1 a as
+
+encode-rle : {A : Set}
+           → (dec-eq : (x y : A) → Dec (x ≡ y))
+           → List A
+           → List (ℕ × A)
+encode-rle dec-eq [] = []
+encode-rle dec-eq (a ∷ as) = encode-rle-helper dec-eq 1 a as
+
+decode-rle : {A : Set}
+           → List (ℕ × A)
+           → List A
 decode-rle [] = []
-decode-rle ((zero , cur) ∷ xs) = decode-rle xs
-decode-rle ((suc ncur , cur) ∷ xs) = cur ∷ decode-rle ((ncur , cur) ∷ xs)
+decode-rle ((na , a) ∷ as) = (replicate na a) ++ (decode-rle as)
 
-lemma-rle : ∀ (ncur cur : ℕ) (xs : List ℕ)
-          → decode-rle (encode-rle-helper (suc ncur) cur xs)
-          ≡ cur ∷ decode-rle (encode-rle-helper ncur cur xs)
-lemma-rle ncur cur [] = refl
-lemma-rle ncur cur (x ∷ xs) with cur ≟ x
-... | yes cur≡x =
-  begin
-    decode-rle (encode-rle-helper (suc (suc ncur)) cur xs)
-  ≡⟨ lemma-rle (suc ncur) cur xs ⟩
-    cur ∷ decode-rle (encode-rle-helper (suc ncur) cur xs)
-  ∎
-... | no ¬cur≡x = refl
+lemma-rle : ∀ {A : Set}
+          → (dec-eq : (x y : A) → Dec (x ≡ y))
+          → (ncur : ℕ)
+          → (cur : A)
+          → (as : List A)
+          → decode-rle (encode-rle-helper dec-eq (suc ncur) cur as)
+          ≡ cur ∷ decode-rle (encode-rle-helper dec-eq ncur cur as)
+lemma-rle dec-eq ncur cur [] = refl
+lemma-rle dec-eq ncur cur (a ∷ as) with dec-eq cur a
+... | yes _ = lemma-rle dec-eq (suc ncur) cur as
+... | no _ = refl
 
-lemma-rle₂ : ∀ (cur : ℕ) (xs : List ℕ)
-           → decode-rle (encode-rle-helper 0 cur xs)
-           ≡ decode-rle (encode-rle xs)
-lemma-rle₂ cur [] = refl
-lemma-rle₂ cur (x ∷ xs) with cur ≟ x
-... | yes cur≡x =
-  begin
-    decode-rle (encode-rle-helper 1 cur xs)
-  ≡⟨ cong (λ z → decode-rle (encode-rle-helper 1 z xs)) cur≡x ⟩
-    decode-rle (encode-rle-helper 1 x xs)
-  ∎
-... | no ¬cur≡x = refl
+lemma-rle₂ : ∀ {A : Set}
+           → (dec-eq : (x y : A) → Dec (x ≡ y))
+           → (cur : A)
+           → (as : List A)
+           → decode-rle (encode-rle-helper dec-eq 0 cur as)
+           ≡ decode-rle (encode-rle dec-eq as)
+lemma-rle₂ dec-eq cur [] = refl
+lemma-rle₂ dec-eq cur (a ∷ as) with dec-eq cur a
+... | yes cur≡a = cong (λ x → decode-rle (encode-rle-helper dec-eq 1 x as)) cur≡a
+... | no ¬cur≡a = refl
 
---problem 15
-rle-roundtrip : ∀ (xs : List ℕ)
-              → decode-rle (encode-rle xs) ≡ xs
-rle-roundtrip [] = refl
-rle-roundtrip (x ∷ xs) =
+--problem 15-3
+rle-roundtrip : ∀ {A : Set}
+              → (dec-eq : (x y : A) → Dec (x ≡ y))
+              → (as : List A)
+              → decode-rle (encode-rle dec-eq as) ≡ as
+rle-roundtrip dec-eq [] = refl
+rle-roundtrip dec-eq (a ∷ as) =
   begin
-    decode-rle (encode-rle (x ∷ xs))
+    decode-rle (encode-rle dec-eq (a ∷ as))
   ≡⟨ refl ⟩
-    decode-rle (encode-rle-helper 1 x xs)
-  ≡⟨ lemma-rle 0 x xs ⟩
-    x ∷ decode-rle (encode-rle-helper 0 x xs)
-  ≡⟨ cong (x ∷_) (lemma-rle₂ x xs) ⟩
-    x ∷ decode-rle (encode-rle xs)
-  ≡⟨ cong (x ∷_) (rle-roundtrip xs) ⟩
-    x ∷ xs
+    decode-rle (encode-rle-helper dec-eq 1 a as)
+  ≡⟨ lemma-rle dec-eq 0 a as ⟩
+    a ∷ decode-rle (encode-rle-helper dec-eq 0 a as)
+  ≡⟨ cong (a ∷_) (lemma-rle₂ dec-eq a as) ⟩
+    a ∷ decode-rle (encode-rle dec-eq as)
+  ≡⟨ cong (a ∷_) (rle-roundtrip dec-eq as) ⟩
+    a ∷ as
   ∎
