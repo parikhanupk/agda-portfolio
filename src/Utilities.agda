@@ -9,6 +9,8 @@ open import Data.List using (List; []; _∷_)
 open import Data.Bool.ListAction using (all)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _<_; _<ᵇ_; _≤_; z≤n; s≤s; _∸_; _≥_)
 open import Data.Nat.Properties using (+-assoc; +-comm; *-identityʳ; *-assoc; *-comm; +-identityʳ)
+open import Relation.Nullary using (¬_)
+open import Data.Empty using (⊥-elim)
 
 
 
@@ -172,3 +174,11 @@ a≥b→ca≥cb a b c a≥b rewrite *-comm c a | *-comm c b = a≥b→ac≥bc a 
 sa∸sa≡0 : ∀ (a : ℕ) → suc a ∸ suc a ≡ 0
 sa∸sa≡0 zero = refl
 sa∸sa≡0 (suc a) = sa∸sa≡0 a
+
+
+
+¬x≤y→y≤x : ∀ (x y : ℕ) → ¬ x ≤ y → y ≤ x
+¬x≤y→y≤x zero zero _ = z≤n
+¬x≤y→y≤x zero (suc y) ¬z≤s = ⊥-elim (¬z≤s z≤n)
+¬x≤y→y≤x (suc x) zero _ = z≤n
+¬x≤y→y≤x (suc x) (suc y) ¬sx≤sy = s≤s (¬x≤y→y≤x x y (λ x≤y → ¬sx≤sy (s≤s x≤y)))
